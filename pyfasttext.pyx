@@ -109,13 +109,14 @@ cdef class FastText:
     self.ft.loadModel(fname)
     self.loaded = True
 
-  def train(self, command, args, encoding=None):
+  def train(self, command, encoding=None, **kwargs):
     if encoding is None:
       encoding = self.encoding
 
-    args = args[:]
-    args.insert(0, command)
-    args.insert(0, 'fastText')
+    args = ['fastText', command]
+    for key, val in kwargs.items():
+      args.append('-' + key)
+      args.append(str(val))
 
     cdef:
       char **c_args = to_cstring_array(args, encoding)
@@ -125,17 +126,18 @@ cdef class FastText:
     self.ft.train(s_args)
 
     free_cstring_array(c_args, len(args))
+    self.loaded = True
 
-  def skipgram(self, args, encoding=None):
-    self.train('skipgram', args, encoding=encoding)
+  def skipgram(self, encoding=None, **kwargs):
+    self.train('skipgram', encoding=encoding, **kwargs)
 
-  def cbow(self, args, encoding=None):
-    self.train('cbow', args, encoding=encoding)
+  def cbow(self, encoding=None, **kwargs):
+    self.train('cbow', encoding=encoding, **kwargs)
 
-  def supervised(self, args, encoding=None):
-    self.train('supervised', args, encoding=encoding)
+  def supervised(self, encoding=None, **kwargs):
+    self.train('supervised', encoding=encoding, **kwargs)
 
-  def test_file(self, fname, k=1, encoding=None):
+  def test(self, fname, k=1, encoding=None):
     if encoding is None:
       encoding = self.encoding
 
