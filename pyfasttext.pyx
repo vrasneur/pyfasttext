@@ -79,6 +79,27 @@ cdef class FastText:
     if not self.loaded:
       raise RuntimeError('model not loaded!')
 
+  def extract_labels(self, fname, encoding=None):
+    labels = []
+
+    if self.prefix is None:
+      return labels
+
+    if encoding is None:
+      encoding = self.encoding
+
+    with open(fname, 'r', encoding=encoding) as f:
+      for line in f:
+        labels.append([label.replace(self.prefix, '') for label in line.split()
+	               if label.startswith(self.prefix)])
+      
+    return labels
+
+  def extract_classes(self, fname, encoding=None):
+    labels = self.extract_labels(fname, encoding=encoding)
+    return [label[0] if label else None
+            for label in labels]
+
   @property
   def encoding(self):
     return self.encoding
