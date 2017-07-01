@@ -1,5 +1,5 @@
-#ifndef EXIT_H
-#define EXIT_H
+#ifndef CUSTOM_EXIT_H
+#define CUSTOM_EXIT_H
 
 #include <stdexcept>
 #include <string>
