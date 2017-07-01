@@ -1,6 +1,9 @@
 #ifndef CUSTOM_EXIT_H
 #define CUSTOM_EXIT_H
 
+// make sure the exit() prototype is included before overriding its definition
+#include <cstdlib>
+
 #include <stdexcept>
 #include <string>
 
