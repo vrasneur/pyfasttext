@@ -1,13 +1,14 @@
-#include <cstdlib>
+#ifndef EXIT_H
+#define EXIT_H
 
 #include <stdexcept>
 #include <string>
 
-#include "exit.h"
+#define exit(status) custom_exit(status)
 
-asm(".symver exit, exit@GLIBC_2.2.5");
-
-void __wrap_exit(int status)
+inline void custom_exit(int status)
 {
   throw std::runtime_error("fastext tried to exit: " + std::to_string(status));
 }
+
+#endif
