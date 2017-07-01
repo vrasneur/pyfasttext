@@ -49,7 +49,7 @@ cdef extern from "fastText/src/fasttext.h" namespace "fasttext":
 cdef extern from "fasttext_access.h":
   cdef shared_ptr[Dictionary] &get_fasttext_dict(CFastText&)
 
-cdef char **to_cstring_array(list_str, encoding):
+cdef char **to_cstring_array(list_str, encoding) except NULL:
   cdef char **ret = <char **>malloc(len(list_str) * sizeof(char *))
   for i in range(len(list_str)):
     temp = strdup(bytes(list_str[i], encoding))
