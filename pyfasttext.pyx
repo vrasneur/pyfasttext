@@ -12,6 +12,7 @@ from libcpp cimport bool
 from libcpp.memory cimport shared_ptr, make_shared, unique_ptr, make_unique
 from libcpp.string cimport string
 from libcpp.vector cimport vector
+from libcpp.map cimport map
 from libcpp.utility cimport pair
 
 cdef extern from "<iostream>" namespace "std":
@@ -29,6 +30,10 @@ cdef extern from "<sstream>" namespace "std":
     void str(const string&)
 
 cdef extern from "fastText/src/args.h" namespace "fasttext":
+  cdef enum loss_name:
+    pass
+  cdef enum model_name:
+    pass
   cdef cppclass Args:
     Args()
     void parseArgs(int, char **) except +
@@ -47,7 +52,16 @@ cdef extern from "fastText/src/fasttext.h" namespace "fasttext":
     void predict(istream&, int32_t, vector[pair[float, string]]&)
 
 cdef extern from "fasttext_access.h":
+  cdef cppclass ArgValue:
+    size_t index()
   cdef shared_ptr[Dictionary] &get_fasttext_dict(CFastText&)
+  cdef shared_ptr[Args] &get_fasttext_args(CFastText&)
+  cdef map[string, ArgValue] get_args_map(shared_ptr[Args]&)
+  string convert_loss_name(loss_name)
+  string convert_model_name(model_name)
+
+cdef extern from "variant/include/mpark/variant.hpp" namespace "mpark":
+  T get[T](ArgValue&)
 
 cdef char **to_cstring_array(list_str, encoding) except NULL:
   cdef char **ret = <char **>malloc(len(list_str) * sizeof(char *))
@@ -121,6 +135,33 @@ cdef class FastText:
       labels.append(label)
 
     return labels
+
+  @property
+  def args(self):
+    ret = {}
+
+    cdef size_t index = 0
+    args = get_fasttext_args(self.ft)
+    args_map = get_args_map(args)
+    for item in args_map:
+      key = item.first.decode(self.encoding)
+      index = item.second.index()
+      if index == 0:
+        ret[key] = get[bool](item.second)
+      elif index == 1:
+        ret[key] = get[int](item.second)
+      elif index == 2:
+        ret[key] = get[size_t](item.second)
+      elif index == 3:
+        ret[key] = get[double](item.second)
+      elif index == 4:
+        ret[key] = get[string](item.second).decode(self.encoding)
+      elif index == 5:
+        ret[key] = convert_loss_name(get[loss_name](item.second))
+      elif index == 6:
+        ret[key] = convert_model_name(get[model_name](item.second))
+
+    return ret
 
   def load_model(self, fname, encoding=None):
     if encoding is None:
