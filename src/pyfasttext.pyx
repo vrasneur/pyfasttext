@@ -36,6 +36,7 @@ ctypedef float real
 cdef extern from "fastText/src/vector.h" namespace "fasttext":
   cdef cppclass Vector:
     Vector(int64_t)
+    void zero()
     int64_t size()
     real& operator[](int64_t)
 
@@ -52,6 +53,8 @@ cdef extern from "fastText/src/dictionary.h" namespace "fasttext":
   cdef cppclass Dictionary:
     int32_t nlabels()
     string getLabel(int32_t)
+    int32_t nwords()
+    string getWord(int32_t)
 
 cdef extern from "fastText/src/fasttext.h" namespace "fasttext":
   cdef cppclass CFastText "fasttext::FastText":
@@ -152,6 +155,9 @@ cdef class FastText:
   def args(self):
     ret = {}
 
+    if not self.loaded:
+      return ret
+
     cdef size_t index = 0
     args = get_fasttext_args(self.ft)
     args_map = get_args_map(args)
@@ -175,6 +181,22 @@ cdef class FastText:
 
     return ret
 
+  @property
+  def words(self):
+    words = []
+
+    if not self.loaded:
+      return words
+
+    dict = get_fasttext_dict(self.ft)
+    nwords = deref(dict).nwords()
+
+    for i in range(nwords):
+      word = deref(dict).getWord(i).decode(self.encoding)
+      words.append(word)
+
+    return words
+
   def __getitem__(self, key):
     cdef:
       int dim = self.ft.getDimension()
@@ -182,6 +204,8 @@ cdef class FastText:
 
     key = bytes(key, self.encoding)
     arr = array.array('f')
+    deref(vec).zero()
+    
     self.ft.getVector(deref(vec), key)
     for i in range(deref(vec).size()):
       arr.append(deref(vec)[i])
