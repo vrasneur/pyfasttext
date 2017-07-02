@@ -4,14 +4,16 @@
 
 using namespace fasttext;
 
+namespace pyfasttext
+{
+
 ALLOW_ACCESS(FastText, std::shared_ptr<Dictionary>, dict_);
+ALLOW_ACCESS(FastText, std::shared_ptr<Args>, args_);
 
 std::shared_ptr<Dictionary> &get_fasttext_dict(FastText &ft)
 {
   return ACCESS(ft, dict_);
 }
-
-ALLOW_ACCESS(FastText, std::shared_ptr<Args>, args_);
 
 std::shared_ptr<Args> &get_fasttext_args(FastText &ft)
 {
@@ -55,4 +57,6 @@ std::string convert_model_name(const fasttext::model_name model)
   default:
     return "unknown";
   }
+}
+
 }

@@ -51,7 +51,7 @@ cdef extern from "fastText/src/fasttext.h" namespace "fasttext":
     void test(istream&, int32_t)
     void predict(istream&, int32_t, vector[pair[float, string]]&)
 
-cdef extern from "fasttext_access.h":
+cdef extern from "fasttext_access.h" namespace "pyfasttext":
   cdef cppclass ArgValue:
     size_t index()
   cdef shared_ptr[Dictionary] &get_fasttext_dict(CFastText&)
