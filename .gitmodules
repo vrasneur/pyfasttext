@@ -1,6 +1,6 @@
 [submodule "fastText"]
-	path = fastText
+	path = src/fastText
 	url = https://github.com/facebookresearch/fastText.git
 [submodule "variant"]
-	path = variant
+	path = src/variant
 	url = https://github.com/mpark/variant.git

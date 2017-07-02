@@ -22,7 +22,7 @@ std::map<std::string, ArgValue> get_args_map(const std::shared_ptr<Args> &args)
 {
   std::map<std::string, ArgValue> vals;
 
-#define ITEM(type, name) vals.emplace(#name, args->name);
+#define ITEM(name) vals.emplace(#name, args->name);
 #include "args.itm"
 #undef ITEM
   

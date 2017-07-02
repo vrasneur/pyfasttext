@@ -4,14 +4,14 @@ from glob import glob
 from os.path import join
 import os
 
-cpp_dir = join('fastText', 'src')
+cpp_dir = join('src', 'fastText', 'src')
 
-sources = ['pyfasttext.pyx', 'fasttext_access.cpp']
+sources = ['src/pyfasttext.pyx', 'src/fasttext_access.cpp']
 # add all the fasttext source files except main.cc
 sources.extend(set(glob(join(cpp_dir, '*.cc'))).difference({join(cpp_dir, 'main.cc')}))
 
 # exit() replacement does not work when we use extra_compile_args
-os.environ['CFLAGS'] = '-iquote . -include custom_exit.h'
+os.environ['CFLAGS'] = '-iquote . -include src/custom_exit.h'
 
 setup(ext_modules = cythonize(Extension(
     'pyfasttext',
