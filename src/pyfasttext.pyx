@@ -1,6 +1,6 @@
 from cython.operator cimport dereference as deref
 
-from libc.stdint cimport int32_t
+from libc.stdint cimport int32_t, int64_t
 from libc.stdio cimport EOF
 from libc.stdlib cimport malloc, free
 from libc.math cimport exp
@@ -15,6 +15,8 @@ from libcpp.vector cimport vector
 from libcpp.map cimport map
 from libcpp.utility cimport pair
 
+import array
+
 cdef extern from "<iostream>" namespace "std":
   cdef cppclass istream:
     int peek()
@@ -28,6 +30,14 @@ cdef extern from "<sstream>" namespace "std":
     istringstream() except +
     istringstream(const string&) except +
     void str(const string&)
+
+ctypedef float real
+
+cdef extern from "fastText/src/vector.h" namespace "fasttext":
+  cdef cppclass Vector:
+    Vector(int64_t)
+    int64_t size()
+    real& operator[](int64_t)
 
 cdef extern from "fastText/src/args.h" namespace "fasttext":
   cdef enum loss_name:
@@ -46,10 +56,12 @@ cdef extern from "fastText/src/dictionary.h" namespace "fasttext":
 cdef extern from "fastText/src/fasttext.h" namespace "fasttext":
   cdef cppclass CFastText "fasttext::FastText":
     FastText() except +
+    int getDimension()
+    void getVector(Vector&, const string&)
     void loadModel(const string&) except +
     void train(shared_ptr[Args]) except +
     void test(istream&, int32_t)
-    void predict(istream&, int32_t, vector[pair[float, string]]&)
+    void predict(istream&, int32_t, vector[pair[real, string]]&)
 
 cdef extern from "fasttext_access.h" namespace "pyfasttext":
   cdef cppclass ArgValue:
@@ -163,6 +175,19 @@ cdef class FastText:
 
     return ret
 
+  def __getitem__(self, key):
+    cdef:
+      int dim = self.ft.getDimension()
+      unique_ptr[Vector] vec = make_unique[Vector](dim)
+
+    key = bytes(key, self.encoding)
+    arr = array.array('f')
+    self.ft.getVector(deref(vec), key)
+    for i in range(deref(vec).size()):
+      arr.append(deref(vec)[i])
+
+    return arr
+
   def load_model(self, fname, encoding=None):
     if encoding is None:
       encoding = self.encoding
@@ -210,7 +235,7 @@ cdef class FastText:
 
     self.ft.test(deref(ifs), c_k)
 
-  cdef convert_c_predictions(self, vector[pair[float, string]] &c_predictions, str encoding):
+  cdef convert_c_predictions(self, vector[pair[real, string]] &c_predictions, str encoding):
     preds = []
     for c_pred in c_predictions:
       proba = exp(c_pred.first)
@@ -232,7 +257,7 @@ cdef class FastText:
     cdef:
       unique_ptr[ifstream] ifs = make_unique[ifstream](<string>fname)
       int32_t c_k = k
-      vector[pair[float, string]] c_predictions
+      vector[pair[real, string]] c_predictions
 
     predictions = []
     while deref(ifs).peek() != EOF:
@@ -250,7 +275,7 @@ cdef class FastText:
     cdef:
       unique_ptr[istringstream] iss = make_unique[istringstream]()
       int32_t c_k = k
-      vector[pair[float, string]] c_predictions
+      vector[pair[real, string]] c_predictions
 
     predictions = []
     for line in lines:
