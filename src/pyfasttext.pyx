@@ -17,7 +17,7 @@ from libcpp.utility cimport pair
 
 import array
 
-cdef extern from "<iostream>" namespace "std":
+cdef extern from "<iostream>" namespace "std" nogil:
   cdef cppclass istream:
     int peek()
 
@@ -25,7 +25,7 @@ cdef extern from "<iostream>" namespace "std":
     ifstream() except +
     ifstream(const string&) except +
 
-cdef extern from "<sstream>" namespace "std":
+cdef extern from "<sstream>" namespace "std" nogil:
   cdef cppclass istringstream(istream):
     istringstream() except +
     istringstream(const string&) except +
@@ -33,14 +33,14 @@ cdef extern from "<sstream>" namespace "std":
 
 ctypedef float real
 
-cdef extern from "fastText/src/vector.h" namespace "fasttext":
+cdef extern from "fastText/src/vector.h" namespace "fasttext" nogil:
   cdef cppclass Vector:
     Vector(int64_t)
     void zero()
     int64_t size()
     real& operator[](int64_t)
 
-cdef extern from "fastText/src/args.h" namespace "fasttext":
+cdef extern from "fastText/src/args.h" namespace "fasttext" nogil:
   cdef enum loss_name:
     pass
   cdef enum model_name:
@@ -49,14 +49,14 @@ cdef extern from "fastText/src/args.h" namespace "fasttext":
     Args()
     void parseArgs(int, char **) except +
 
-cdef extern from "fastText/src/dictionary.h" namespace "fasttext":
+cdef extern from "fastText/src/dictionary.h" namespace "fasttext" nogil:
   cdef cppclass Dictionary:
     int32_t nlabels()
     string getLabel(int32_t)
     int32_t nwords()
     string getWord(int32_t)
 
-cdef extern from "fastText/src/fasttext.h" namespace "fasttext":
+cdef extern from "fastText/src/fasttext.h" namespace "fasttext" nogil:
   cdef cppclass CFastText "fasttext::FastText":
     FastText() except +
     int getDimension()
@@ -66,7 +66,7 @@ cdef extern from "fastText/src/fasttext.h" namespace "fasttext":
     void test(istream&, int32_t)
     void predict(istream&, int32_t, vector[pair[real, string]]&)
 
-cdef extern from "fasttext_access.h" namespace "pyfasttext":
+cdef extern from "fasttext_access.h" namespace "pyfasttext" nogil:
   cdef cppclass ArgValue:
     size_t index()
   cdef shared_ptr[Dictionary] &get_fasttext_dict(CFastText&)
@@ -75,7 +75,7 @@ cdef extern from "fasttext_access.h" namespace "pyfasttext":
   string convert_loss_name(loss_name)
   string convert_model_name(model_name)
 
-cdef extern from "variant/include/mpark/variant.hpp" namespace "mpark":
+cdef extern from "variant/include/mpark/variant.hpp" namespace "mpark" nogil:
   T get[T](ArgValue&)
 
 cdef char **to_cstring_array(list_str, encoding) except NULL:
