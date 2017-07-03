@@ -6,7 +6,7 @@
 
 #include "fastText/src/fasttext.h"
 
-#include "variant/include/mpark/variant.hpp"
+#include "variant/v1.2.0/variant.hpp"
 
 namespace pyfasttext
 {

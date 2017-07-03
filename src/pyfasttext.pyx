@@ -75,7 +75,7 @@ cdef extern from "fasttext_access.h" namespace "pyfasttext" nogil:
   string convert_loss_name(loss_name)
   string convert_model_name(model_name)
 
-cdef extern from "variant/include/mpark/variant.hpp" namespace "mpark" nogil:
+cdef extern from "variant/v1.2.0/variant.hpp" namespace "mpark" nogil:
   T get[T](ArgValue&)
 
 cdef char **to_cstring_array(list_str, encoding) except NULL:
