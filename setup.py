@@ -18,7 +18,8 @@ extension = Extension(
     sources=sources,
     libraries=['pthread'],
     include_dirs=['.'],
-    language='c++')
+    language='c++',
+    extra_compile_args=['-std=c++14'])
 
 setup(name='pyfasttext',
       version='0.1',
