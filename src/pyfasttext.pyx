@@ -13,7 +13,9 @@ from libcpp.memory cimport shared_ptr, make_shared, unique_ptr, make_unique
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.map cimport map
+from libcpp.set cimport set
 from libcpp.utility cimport pair
+from libcpp.queue cimport priority_queue
 
 import array
 
@@ -39,6 +41,16 @@ cdef extern from "fastText/src/vector.h" namespace "fasttext" nogil:
     void zero()
     int64_t size()
     real& operator[](int64_t)
+    real norm()
+    void addVector(const Vector &, real)
+
+cdef extern from "fastText/src/matrix.h" namespace "fasttext" nogil:
+  cdef cppclass Matrix:
+    Matrix()
+    Matrix(int64_t, int64_t)
+    void zero()
+    void addRow(const Vector&, int64_t, real)
+    real dotRow(const Vector&, int64_t)
 
 cdef extern from "fastText/src/args.h" namespace "fasttext" nogil:
   cdef enum loss_name:
@@ -98,6 +110,7 @@ cdef class FastText:
     str encoding
     str prefix
     bool loaded
+    unique_ptr[Matrix] word_vectors
 
   def __cinit__(self, prefix='__label__', encoding='utf8'):
     self.prefix = prefix
@@ -212,6 +225,115 @@ cdef class FastText:
 
     return arr
 
+  cdef precompute_word_vectors(self):
+    if self.word_vectors:
+      return
+
+    cdef:
+      unique_ptr[Vector] vec = make_unique[Vector](self.ft.getDimension())
+      string word
+    dict = get_fasttext_dict(self.ft)
+    self.word_vectors = make_unique[Matrix](deref(dict).nwords(), self.ft.getDimension())
+    deref(self.word_vectors).zero()
+    for i in range(deref(dict).nwords()):
+      word = deref(dict).getWord(i)
+      self.ft.getVector(deref(vec), word)
+      norm = deref(vec).norm()
+      deref(self.word_vectors).addRow(deref(vec), i, 1.0 / norm)
+
+  cdef find_nearest_neighbors(self, const Vector &query_vec, int32_t k,
+                              const set[string] &ban_set, encoding):
+    self.precompute_word_vectors()
+
+    cdef:
+      priority_queue[pair[real, string]] heap
+      unique_ptr[Vector] vec = make_unique[Vector](self.ft.getDimension())
+      string word
+      int32_t i = 0
+
+    ret = []
+
+    query_norm = query_vec.norm()
+    if abs(query_norm) < 1e-8:
+      query_norm = 1.0
+    dict = get_fasttext_dict(self.ft)
+    for idx in range(deref(dict).nwords()):
+      word = deref(dict).getWord(idx)
+      dp = deref(self.word_vectors).dotRow(query_vec, idx)
+      heap.push(pair[real, string](dp / query_norm, word))
+
+    while i < k and heap.size() > 0:
+      it = ban_set.find(heap.top().second)
+      if it == ban_set.end():
+        ret.append((heap.top().second.decode(encoding), heap.top().first))
+        i += 1
+
+      heap.pop()
+
+    return ret
+
+  def nn(self, word, k=10, encoding=None):
+    self.check_loaded()
+
+    if encoding is None:
+      encoding = self.encoding
+
+    word = bytes(word, encoding)
+    cdef:
+      unique_ptr[Vector] vec = make_unique[Vector](self.ft.getDimension())
+      set[string] ban_set
+      int32_t c_k = k
+    ban_set.insert(word)
+    self.ft.getVector(deref(vec), word)
+    return self.find_nearest_neighbors(deref(vec), c_k, ban_set, encoding)
+
+  def similarity(self, word1, word2, encoding=None):
+    self.check_loaded()
+
+    if encoding is None:
+      encoding = self.encoding
+
+    word1 = bytes(word1, encoding)
+    word2 = bytes(word2, encoding)
+    cdef:
+      unique_ptr[Vector] vec1 = make_unique[Vector](self.ft.getDimension())
+      unique_ptr[Vector] vec2 = make_unique[Vector](self.ft.getDimension())
+      real dp = 0.0
+
+    self.ft.getVector(deref(vec1), word1)
+    self.ft.getVector(deref(vec2), word2)
+    for i in range(self.ft.getDimension()):
+      dp += deref(vec1)[i] * deref(vec2)[i]
+
+    return dp / (deref(vec1).norm() * deref(vec2).norm())
+
+  def most_similar(self, positive=[], negative=[], k=10, encoding=None):
+    self.check_loaded()
+
+    if encoding is None:
+      encoding = self.encoding
+
+    self.precompute_word_vectors()
+
+    cdef:
+      unique_ptr[Vector] buffer = make_unique[Vector](self.ft.getDimension())
+      unique_ptr[Vector] query = make_unique[Vector](self.ft.getDimension())
+      set[string] ban_set
+      int32_t c_k = k
+
+    deref(query).zero()
+    for word in positive:
+      word = bytes(word, encoding)
+      ban_set.insert(word)
+      self.ft.getVector(deref(buffer), word)
+      deref(query).addVector(deref(buffer), 1.0)
+    for word in negative:
+      word = bytes(word, encoding)
+      ban_set.insert(word)
+      self.ft.getVector(deref(buffer), word)
+      deref(query).addVector(deref(buffer), -1.0)
+    return self.find_nearest_neighbors(deref(query), c_k, ban_set, encoding)
+
   def load_model(self, fname, encoding=None):
     if encoding is None:
       encoding = self.encoding
@@ -267,7 +389,7 @@ cdef class FastText:
       if self.prefix is not None:
         label = label.replace(self.prefix, '')
 
-      preds.append((proba, label))
+      preds.append((label, proba))
 
     return preds
 
