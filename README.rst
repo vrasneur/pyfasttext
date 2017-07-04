@@ -132,20 +132,20 @@ If you have a list of strings (or an iterable object), use this:
 .. code:: python
 
     >>> model.predict_proba(['first sentence', 'second sentence'], k=2)
-    [[('LABEL1', 0.99609375), ('LABEL3', 1.953126549381068e-08)], [('LABEL2', 1.0), ('LABEL2', 1.953126549381068e-08)]]
+    [[('LABEL1', 0.99609375), ('LABEL3', 1.953126549381068e-08)], [('LABEL2', 1.0), ('LABEL3', 1.953126549381068e-08)]]
 
 If your test data is stored inside a file, use this:
 
 .. code:: python
 
-    >>> model.predict_file('/path/to/test.txt', k=3)
-    [[('LABEL1', 0.99609375), ('LABEL3', 1.953126549381068e-08)], [('LABEL2', 1.0), ('LABEL2', 1.953126549381068e-08)]]
+    >>> model.predict_file('/path/to/test.txt', k=2)
+    [[('LABEL1', 0.99609375), ('LABEL3', 1.953126549381068e-08)], [('LABEL2', 1.0), ('LABEL3', 1.953126549381068e-08)]]
 
 If you want to test a single string, use this:
 
 .. code:: python
 
-    >>> model.predict_line('first sentence'', k=3)
+    >>> model.predict_line('first sentence'', k=2)
     [('LABEL1', 0.99609375), ('LABEL3', 1.953126549381068e-08)]
 
 Misc utilities
