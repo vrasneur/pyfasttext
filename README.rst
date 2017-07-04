@@ -2,7 +2,7 @@ pyfasttext
 ==========
 
 Yet another Python binding for
-`fastText <https://github.com/facebookresearch/fastText>`__
+`fastText <https://github.com/facebookresearch/fastText>`__.
 
 The binding only supports Python 3 and requires Cython.
 
@@ -97,10 +97,13 @@ Most similar words
 Analogies
 ^^^^^^^^^
 
+The ``most_similar()`` method works similarly as the one in
+`gensim <https://radimrehurek.com/gensim/models/keyedvectors.html>`__.
+
 .. code:: python
 
     >>> model.most_similar(positive=['woman', 'king'], negative=['man'], k=1)
-    0.77121970653533936
+    [('queen', 0.77121970653533936)]
 
 Text classification
 ~~~~~~~~~~~~~~~~~~~
@@ -145,7 +148,7 @@ If you want to test a single string, use this:
 
 .. code:: python
 
-    >>> model.predict_line('first sentence'', k=2)
+    >>> model.predict_line('first sentence', k=2)
     [('LABEL1', 0.99609375), ('LABEL3', 1.953126549381068e-08)]
 
 Misc utilities
