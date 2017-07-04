@@ -112,10 +112,13 @@ cdef class FastText:
     bool loaded
     unique_ptr[Matrix] word_vectors
 
-  def __cinit__(self, prefix='__label__', encoding='utf8'):
+  def __cinit__(self, model_fname=None, prefix='__label__', encoding='utf8'):
     self.prefix = prefix
     self.encoding = encoding
     self.loaded = False
+
+    if model_fname is not None:
+      self.load_model(model_fname)
 
   cdef check_loaded(self):
     if not self.loaded:
