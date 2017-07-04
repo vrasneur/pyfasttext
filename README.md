@@ -126,6 +126,19 @@ If you want to test a single string, use this:
 
 #### Misc utilities
 
+##### Show the model (hyper)parameters
+
+```python
+>>> model.args
+{'bucket': 11000000,
+ 'cutoff': 0,
+ 'dim': 100,
+ 'dsub': 2,
+ 'epoch': 100,
+...
+}
+```
+
 ##### Extract labels from a dataset
 
 There can be multiple labels per line.
