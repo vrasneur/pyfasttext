@@ -415,7 +415,7 @@ cdef class FastText:
       predictions.append(self.convert_c_predictions(c_predictions, encoding))
     return predictions
 
-  def predict_lines(self, lines, k=1, encoding=None):
+  def predict_proba(self, lines, k=1, encoding=None):
     self.check_loaded()
 
     if encoding is None:
@@ -436,4 +436,4 @@ cdef class FastText:
     return predictions
 
   def predict_line(self, line, k=1, encoding=None):
-    return self.predict_lines([line], k=k, encoding=encoding)[0]
+    return self.predict_proba([line], k=k, encoding=encoding)[0]
