@@ -13,10 +13,30 @@ sources.extend(set(glob(join(cpp_dir, '*.cc'))).difference({join(cpp_dir, 'main.
 # exit() replacement does not work when we use extra_compile_args
 os.environ['CFLAGS'] = '-iquote . -include src/custom_exit.h'
 
-setup(ext_modules = cythonize(Extension(
+extension = Extension(
     'pyfasttext',
     sources=sources,
     libraries=['pthread'],
     include_dirs=['.'],
-    language='c++',
-)))
+    language='c++')
+
+setup(name='pyfasttext',
+      version='0.1',
+      author='Vincent Rasneur',
+      author_email='vrasneur@free.fr',
+      url='https://github.com/vrasneur/pyfasttext',
+      description='Yet another Python binding for fastText',
+      long_description=open('README.rst', 'r').read(),
+      license='GPLv3',
+      package_dir = {'': 'src'},
+      ext_modules=cythonize(extension),
+      classifiers=[
+          'Development Status :: 3 - Alpha',
+          'Intended Audience :: Developers',
+          'Intended Audience :: Science/Research',
+          'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+          'Programming Language :: C++',
+          'Programming Language :: Cython',
+          'Programming Language :: Python :: 3',
+          'Topic :: Scientific/Engineering :: Artificial Intelligence'
+      ])
