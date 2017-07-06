@@ -171,14 +171,9 @@ Instead of exiting, `pyfasttext` raises a Python exception (`RuntimeError`).
 >>> import pyfasttext
 >>> model = pyfasttext.FastText('/path/to/non-existing_model.bin')
 Model file cannot be opened for loading!
----------------------------------------------------------------------------
-RuntimeError                              Traceback (most recent call last)
-<ipython-input-2-06e9d7182672> in <module>()
-----> 1 model = pyfasttext.FastText('/path/to/non-existing_model.bin')
-
-src/pyfasttext.pyx in pyfasttext.FastText.__cinit__ (src/pyfasttext.cpp:1800)()
-
-src/pyfasttext.pyx in pyfasttext.FastText.load_model (src/pyfasttext.cpp:5947)()
-
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "src/pyfasttext.pyx", line 124, in pyfasttext.FastText.__cinit__ (src/pyfasttext.cpp:1800)
+  File "src/pyfasttext.pyx", line 348, in pyfasttext.FastText.load_model (src/pyfasttext.cpp:5947)
 RuntimeError: fastext tried to exit: 1
 ```
