@@ -9,7 +9,7 @@ from libc.string cimport strdup
 from builtins import bytes
 
 from libcpp cimport bool
-from libcpp.memory cimport shared_ptr, make_shared, unique_ptr, make_unique
+from libcpp.memory cimport shared_ptr, make_shared, unique_ptr
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp.map cimport map
@@ -77,6 +77,9 @@ cdef extern from "fastText/src/fasttext.h" namespace "fasttext" nogil:
     void train(shared_ptr[Args]) except +
     void test(istream&, int32_t)
     void predict(istream&, int32_t, vector[pair[real, string]]&)
+
+cdef extern from "compat.h" namespace "pyfasttext" nogil:
+  unique_ptr[T] make_unique[T](...)
 
 cdef extern from "fasttext_access.h" namespace "pyfasttext" nogil:
   cdef cppclass ArgValue:

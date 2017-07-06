@@ -5,6 +5,8 @@ The binding only supports Python 3 and requires Cython.
 
 ## Installation
 
+To compile `pyfasttext`, make sure you have a compiler with C++11 support.
+
 ```bash
 git clone --recursive https://github.com/vrasneur/pyfasttext.git
 python setup.py install
