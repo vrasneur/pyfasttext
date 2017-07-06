@@ -19,7 +19,7 @@ extension = Extension(
     libraries=['pthread'],
     include_dirs=['.'],
     language='c++',
-    extra_compile_args=['-std=c++0x'])
+    extra_compile_args=['-std=c++0x', '-Wno-sign-compare'])
 
 setup(name='pyfasttext',
       version='0.1',
