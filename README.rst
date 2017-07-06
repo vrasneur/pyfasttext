@@ -44,7 +44,7 @@ or
 Word representation learning
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-| You can use all the options provided by the fastText binary
+| You can use all the options provided by the ``fastText`` binary
   (``input``, ``output``, ``epoch``, ``lr``, ...).
 | Just use keyword arguments in the training methods of the ``FastText``
   object.
@@ -155,10 +155,10 @@ If you want to test a single string, use this:
     [('LABEL1', 0.99609375), ('LABEL3', 1.953126549381068e-08)]
 
 Misc utilities
-^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~
 
 Show the model (hyper)parameters
-''''''''''''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
@@ -172,7 +172,7 @@ Show the model (hyper)parameters
     }
 
 Extract labels from a dataset
-'''''''''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 There can be multiple labels per line.
 
@@ -182,7 +182,7 @@ There can be multiple labels per line.
     [['LABEL2', 'LABEL5'], ['LABEL1'], ...]
 
 Extract classes from a dataset
-''''''''''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 There can be only one class per line.
 
@@ -190,3 +190,28 @@ There can be only one class per line.
 
     >>> model.extract_classes('/path/to/dataset2.txt')
     ['LABEL3', 'LABEL1', 'LABEL2', ...]
+
+Exceptions
+~~~~~~~~~~
+
+The ``fastText`` source code directly calls exit() when something wrong
+happens (e.g. a model file does not exist, ...).
+
+Instead of exiting, ``pyfasttext`` raises a Python exception
+(``RuntimeError``).
+
+.. code:: python
+
+    >>> import pyfasttext
+    >>> model = pyfasttext.FastText('/path/to/non-existing_model.bin')
+    Model file cannot be opened for loading!
+    ---------------------------------------------------------------------------
+    RuntimeError                              Traceback (most recent call last)
+    <ipython-input-2-06e9d7182672> in <module>()
+    ----> 1 model = pyfasttext.FastText('/path/to/non-existing_model.bin')
+
+    src/pyfasttext.pyx in pyfasttext.FastText.__cinit__ (src/pyfasttext.cpp:1800)()
+
+    src/pyfasttext.pyx in pyfasttext.FastText.load_model (src/pyfasttext.cpp:5947)()
+
+    RuntimeError: fastext tried to exit: 1
