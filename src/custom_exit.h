@@ -5,13 +5,16 @@
 #include <cstdlib>
 
 #include <stdexcept>
-#include <string>
+#include <sstream>
 
 #define exit(status) custom_exit(status)
 
 inline void custom_exit(int status)
 {
-  throw std::runtime_error("fastext tried to exit: " + std::to_string(status));
+  std::stringstream ss;
+  ss << "fastext tried to exit: " << status;
+  
+  throw std::runtime_error(ss.str());
 }
 
 #endif
