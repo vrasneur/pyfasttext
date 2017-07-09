@@ -120,7 +120,7 @@ The `most_similar()` method works similarly as the one in [gensim](https://radim
 
 #### Prediction
 
-To obtain the *k* most likely labels from test sentences, there are multiple _predict_*()_ methods.
+To obtain the *k* most likely labels from test sentences, there are multiple _predict_*()_ methods.  
 If you want to obtain all the possible labels, use *None* for *k*.
 
 ##### Labels and probabilities
