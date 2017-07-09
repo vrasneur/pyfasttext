@@ -75,6 +75,7 @@ cdef extern from "fastText/src/fasttext.h" namespace "fasttext" nogil:
     void getVector(Vector&, const string&)
     void loadModel(const string&) except +
     void train(shared_ptr[Args]) except +
+    void quantize(shared_ptr[Args]) except +
     void test(istream&, int32_t)
     void predict(istream&, int32_t, vector[pair[real, string]]&)
 
@@ -384,7 +385,10 @@ cdef class FastText:
       shared_ptr[Args] s_args = make_shared[Args]()
 
     deref(s_args).parseArgs(len(args), c_args)
-    self.ft.train(s_args)
+    if command == 'quantize':
+      self.ft.quantize(s_args)
+    else:
+      self.ft.train(s_args)
 
     free_cstring_array(c_args, len(args))
     self.loaded = True
@@ -397,6 +401,9 @@ cdef class FastText:
 
   def supervised(self, encoding=None, **kwargs):
     self.train('supervised', encoding=encoding, **kwargs)
+
+  def quantize(self, encoding=None, **kwargs):
+    self.train('quantize', encoding=encoding, **kwargs)
 
   def test(self, fname, k=1, encoding=None):
     if k is None:

@@ -101,7 +101,7 @@ The `most_similar()` method works similarly as the one in [gensim](https://radim
 
 ```python
 >>> model = FastText()
->>> model.supervised(input='data.txt', output='model', epoch=100, lr=0.7)
+>>> model.supervised(input='/path/to/input.txt', output='/path/to/model', epoch=100, lr=0.7)
 ```
 
 #### Get all the labels
@@ -120,8 +120,8 @@ The `most_similar()` method works similarly as the one in [gensim](https://radim
 
 #### Prediction
 
-To obtain the *k* most likely labels from test sentences, there are multiple _predict_*()_ methods.  
-If you want to obtain all the possible labels, use *None* for *k*.
+To obtain the `k` most likely labels from test sentences, there are multiple `predict_*()` methods.  
+If you want to obtain all the possible labels, use `None` for `k`.
 
 ##### Labels and probabilities
 
@@ -166,6 +166,16 @@ If you want to test a single string, use this:
 >>> model.predict_single('first sentence', k=2)
 ['LABEL1', 'LABEL3']
 ```
+
+#### Quantization
+
+Use keyword arguments in the `quantize()` method.
+
+```python
+>>> model.quantize(input='/path/to/input.txt', output='/path/to/model')
+```
+
+You can load quantized models using the `FastText` constructor or the `load_model()` method.
 
 ### Misc utilities
 
