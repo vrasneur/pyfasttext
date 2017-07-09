@@ -81,6 +81,14 @@ Get all the word vectors in a model
     >>> for word in model.words:
     ...   print(word, model[word])
 
+Get the number of words in the model
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: python
+
+    >>> model.nwords
+    500000
+
 Word similarity
 ^^^^^^^^^^^^^^^
 
@@ -94,7 +102,7 @@ Most similar words
 
 .. code:: python
 
-    >>> model.nn('dog', k=2)
+    >>> model.nearest_neighbors('dog', k=2)
     [('dogs', 0.7843924736976624), ('cat', 75596606254577637)]
 
 Analogies
@@ -127,11 +135,23 @@ Get all the labels
     >>> model.labels
     ['LABEL1', 'LABEL2', ...]
 
+Get the number of labels
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: python
+
+    >>> model.nlabels
+    100
+
 Prediction
 ^^^^^^^^^^
 
-To obtain the *k* most likely label from test sentences, there are
-multiple *predict*\ \*()\_ methods.
+To obtain the *k* most likely labels from test sentences, there are
+multiple *predict()\_ methods.
+If you want to obtain all the possible labels, use *\ None\* for *k*.
+
+Labels and probabilities
+''''''''''''''''''''''''
 
 If you have a list of strings (or an iterable object), use this:
 
@@ -144,15 +164,39 @@ If your test data is stored inside a file, use this:
 
 .. code:: python
 
-    >>> model.predict_file('/path/to/test.txt', k=2)
+    >>> model.predict_proba_file('/path/to/test.txt', k=2)
     [[('LABEL1', 0.99609375), ('LABEL3', 1.953126549381068e-08)], [('LABEL2', 1.0), ('LABEL3', 1.953126549381068e-08)]]
 
 If you want to test a single string, use this:
 
 .. code:: python
 
-    >>> model.predict_line('first sentence', k=2)
+    >>> model.predict_proba_single('first sentence', k=2)
     [('LABEL1', 0.99609375), ('LABEL3', 1.953126549381068e-08)]
+
+Labels only
+'''''''''''
+
+If you have a list of strings (or an iterable object), use this:
+
+.. code:: python
+
+    >>> model.predict(['first sentence', 'second sentence'], k=2)
+    [['LABEL1', 'LABEL3'], ['LABEL2', 'LABEL3']]
+
+If your test data is stored inside a file, use this:
+
+.. code:: python
+
+    >>> model.predict_file('/path/to/test.txt', k=2)
+    [['LABEL1', 'LABEL3'], ['LABEL2', 'LABEL3']]
+
+If you want to test a single string, use this:
+
+.. code:: python
+
+    >>> model.predict_single('first sentence', k=2)
+    ['LABEL1', 'LABEL3']
 
 Misc utilities
 ~~~~~~~~~~~~~~

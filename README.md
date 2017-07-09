@@ -65,6 +65,13 @@ array('f', [-0.4947430193424225, 8.133808296406642e-05, ...])
 ...   print(word, model[word])
 ```
 
+### Get the number of words in the model
+
+```python
+>>> model.nwords
+500000
+```
+
 #### Word similarity
 
 ```python
@@ -75,7 +82,7 @@ array('f', [-0.4947430193424225, 8.133808296406642e-05, ...])
 ### Most similar words
 
 ```python
->>> model.nn('dog', k=2)
+>>> model.nearest_neighbors('dog', k=2)
 [('dogs', 0.7843924736976624), ('cat', 75596606254577637)]
 ```
 
@@ -104,9 +111,19 @@ The `most_similar()` method works similarly as the one in [gensim](https://radim
 ['LABEL1', 'LABEL2', ...]
 ```
 
+#### Get the number of labels
+
+```python
+>>> model.nlabels
+100
+```
+
 #### Prediction
 
-To obtain the *k* most likely label from test sentences, there are multiple _predict_*()_ methods.
+To obtain the *k* most likely labels from test sentences, there are multiple _predict_*()_ methods.
+If you want to obtain all the possible labels, use *None* for *k*.
+
+##### Labels and probabilities
 
 If you have a list of strings (or an iterable object), use this:
 
@@ -117,15 +134,37 @@ If you have a list of strings (or an iterable object), use this:
 If your test data is stored inside a file, use this:
 
 ```python
->>> model.predict_file('/path/to/test.txt', k=2)
+>>> model.predict_proba_file('/path/to/test.txt', k=2)
 [[('LABEL1', 0.99609375), ('LABEL3', 1.953126549381068e-08)], [('LABEL2', 1.0), ('LABEL3', 1.953126549381068e-08)]]
 ```
 
 If you want to test a single string, use this:
 
 ```python
->>> model.predict_line('first sentence', k=2)
+>>> model.predict_proba_single('first sentence', k=2)
 [('LABEL1', 0.99609375), ('LABEL3', 1.953126549381068e-08)]
+```
+
+##### Labels only
+
+If you have a list of strings (or an iterable object), use this:
+
+```python
+>>> model.predict(['first sentence', 'second sentence'], k=2)
+[['LABEL1', 'LABEL3'], ['LABEL2', 'LABEL3']]
+```
+If your test data is stored inside a file, use this:
+
+```python
+>>> model.predict_file('/path/to/test.txt', k=2)
+[['LABEL1', 'LABEL3'], ['LABEL2', 'LABEL3']]
+```
+
+If you want to test a single string, use this:
+
+```python
+>>> model.predict_single('first sentence', k=2)
+['LABEL1', 'LABEL3']
 ```
 
 ### Misc utilities
