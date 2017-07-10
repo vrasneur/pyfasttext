@@ -4,7 +4,9 @@ pyfasttext
 Yet another Python binding for
 `fastText <https://github.com/facebookresearch/fastText>`__.
 
-The binding only supports Python 3 and requires Cython.
+The binding supports Python 2.7 and Python 3. It requires Cython.
+
+``pyfasttext`` has been tested successfully on Linux and Mac OS X.
 
 Installation
 ------------
@@ -12,9 +14,36 @@ Installation
 To compile ``pyfasttext``, make sure you have a compiler with C++11
 support.
 
+Cloning
+~~~~~~~
+
+| ``pyfasttext`` uses git
+  `submodules <https://git-scm.com/book/en/v2/Git-Tools-Submodules>`__.
+| So, you need to add the ``--recursive`` option when you clone the
+  repository.
+
 .. code:: bash
 
     git clone --recursive https://github.com/vrasneur/pyfasttext.git
+    cd pyfasttext
+
+Requirements for Python 2.7
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+| Python 2.7 support relies on the `future <http://python-future.org>`__
+  module: ``pyfasttext`` needs ``bytes`` objects, which are not
+  available natively in Python2.
+| You can install the ``future`` module with ``pip``.
+
+.. code:: bash
+
+    pip install future
+
+Building and installing
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+
     python setup.py install
 
 Usage
