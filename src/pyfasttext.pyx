@@ -112,12 +112,12 @@ cdef class FastText:
   cdef:
     CFastText ft
     str encoding
-    str prefix
+    str label
     bool loaded
     unique_ptr[Matrix] word_vectors
 
-  def __cinit__(self, model_fname=None, prefix='__label__', encoding='utf8'):
-    self.prefix = prefix
+  def __cinit__(self, model_fname=None, label='__label__', encoding='utf8'):
+    self.label = label
     self.encoding = encoding
     self.loaded = False
 
@@ -131,7 +131,7 @@ cdef class FastText:
   def extract_labels(self, fname, encoding=None):
     labels = []
 
-    if self.prefix is None:
+    if self.label is None:
       return labels
 
     if encoding is None:
@@ -139,8 +139,8 @@ cdef class FastText:
 
     with open(fname, 'r', encoding=encoding) as f:
       for line in f:
-        labels.append([label.replace(self.prefix, '') for label in line.split()
-	               if label.startswith(self.prefix)])
+        labels.append([label.replace(self.label, '') for label in line.split()
+	               if label.startswith(self.label)])
       
     return labels
 
@@ -165,8 +165,8 @@ cdef class FastText:
 
     for i in range(nlabels):
       label = deref(dict).getLabel(i).decode(self.encoding)
-      if self.prefix is not None:
-        label = label.replace(self.prefix, '')
+      if self.label is not None:
+        label = label.replace(self.label, '')
       labels.append(label)
 
     return labels
@@ -363,12 +363,22 @@ cdef class FastText:
       deref(query).addVector(deref(buffer), -1.0)
     return self.find_nearest_neighbors(deref(query), k, ban_set, encoding)
 
+  cdef update_label(self, encoding):
+    args = get_fasttext_args(self.ft)
+    args_map = get_args_map(args)
+    iter = args_map.find(b'label')
+    if iter != args_map.end():
+      label = get[string](deref(iter).second).decode(encoding)
+      if label:
+        self.label = label
+
   def load_model(self, fname, encoding=None):
     if encoding is None:
       encoding = self.encoding
 
     fname = bytes(fname, encoding)
     self.ft.loadModel(fname)
+    self.update_label(encoding)
     self.loaded = True
 
   def train(self, command, encoding=None, **kwargs):
@@ -391,6 +401,7 @@ cdef class FastText:
       self.ft.train(s_args)
 
     free_cstring_array(c_args, len(args))
+    self.update_label(encoding)
     self.loaded = True
 
   def skipgram(self, encoding=None, **kwargs):
@@ -434,8 +445,8 @@ cdef class FastText:
          proba -= log_sum
       proba = exp(proba)
       label = c_pred.second.decode(encoding)
-      if self.prefix is not None:
-        label = label.replace(self.prefix, '')
+      if self.label is not None:
+        label = label.replace(self.label, '')
 
       preds.append((label, proba))
 
@@ -446,8 +457,8 @@ cdef class FastText:
     preds = []
     for c_pred in c_predictions:
       label = c_pred.second.decode(encoding)
-      if self.prefix is not None:
-        label = label.replace(self.prefix, '')
+      if self.label is not None:
+        label = label.replace(self.label, '')
 
       preds.append(label)
 
