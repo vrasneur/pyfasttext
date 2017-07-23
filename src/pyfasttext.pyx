@@ -59,6 +59,7 @@ cdef extern from "fastText/src/args.h" namespace "fasttext" nogil:
     pass
   cdef cppclass Args:
     Args()
+    string label
     void parseArgs(int, char **) except +
 
 cdef extern from "fastText/src/dictionary.h" namespace "fasttext" nogil:
@@ -193,6 +194,7 @@ cdef class FastText:
     ret = {}
 
     if not self.loaded:
+      ret['label'] = self.label
       return ret
 
     cdef size_t index = 0
@@ -370,12 +372,8 @@ cdef class FastText:
 
   cdef update_label(self, encoding):
     args = get_fasttext_args(self.ft)
-    args_map = get_args_map(args)
-    iter = args_map.find(b'label')
-    if iter != args_map.end():
-      label = get[string](deref(iter).second).decode(encoding)
-      if label:
-        self.label = label
+    if not deref(args).label.empty():
+        self.label = deref(args).label.decode(encoding)
 
   def load_model(self, fname, encoding=None):
     if encoding is None:
