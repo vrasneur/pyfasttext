@@ -153,6 +153,11 @@ cdef class FastText:
   def encoding(self):
     return self.encoding
 
+  # label is the label *prefix* in fastText source code
+  @property
+  def label(self):
+    return self.label
+
   @property
   def labels(self):
     labels = []
