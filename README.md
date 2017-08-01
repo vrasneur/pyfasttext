@@ -167,6 +167,19 @@ If you want to test a single string, use this:
 [('LABEL1', 0.99609375), ('LABEL3', 1.953126549381068e-08)]
 ```
 
+###### Normalized probabilities
+
+For performance reasons, fastText probabilities often do not sum up to 1.0.
+
+If you want normalized probabilities (where the sum is closer to 1.0 than the original probabilities), you can use the `normalized=True` parameter in all the methods that output probabilities (`predict_proba()`, `predict_proba_file()` and `predict_proba_single()`).
+
+```python
+>>> sum(proba for label, proba in model.predict_proba_single('this is a sentence that needs to be classified', k=None))
+0.9785203068801335
+>>> sum(proba for label, proba in model.predict_proba_single('this is a sentence that needs to be classified', k=None, normalized=True))
+0.9999999999999898
+```
+
 ##### Labels only
 
 If you have a list of strings (or an iterable object), use this:
@@ -214,7 +227,18 @@ You can load quantized models using the `FastText` constructor or the `load_mode
 }
 ```
 
-#### Extract labels from a dataset
+#### Extract labels or classes from a dataset
+
+You can use the `FastText` object to extract labels or classes from a dataset.
+The label prefix (which is `__label__` by default) is set using the `label` parameter in the constructor.
+
+If you load an existing model, the label prefix will be the one defined in the model.
+
+```python
+>>> model = FastText(label='__my_prefix__')
+```
+
+##### Extract labels
 
 There can be multiple labels per line.
 
@@ -223,7 +247,7 @@ There can be multiple labels per line.
 [['LABEL2', 'LABEL5'], ['LABEL1'], ...]
 ```
 
-#### Extract classes from a dataset
+##### Extract classes
 
 There can be only one class per line.
 

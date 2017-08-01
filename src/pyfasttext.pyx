@@ -467,7 +467,7 @@ cdef class FastText:
 
     return preds
 
-  cdef predict_aux(self, lines, int32_t k, bool proba, bool normalized, str encoding):
+  cdef predict_aux(self, lines, k, bool proba, bool normalized, str encoding):
     self.check_loaded()
 
     if k is None:
@@ -505,7 +505,7 @@ cdef class FastText:
   def predict_single(self, line, k=1, encoding=None):
     return self.predict([line], k=k, encoding=encoding)[0]
 
-  cdef predict_aux_file(self, fname, int32_t k, bool proba, bool normalized, str encoding):
+  cdef predict_aux_file(self, fname, k, bool proba, bool normalized, str encoding):
     self.check_loaded()
 
     if k is None:
