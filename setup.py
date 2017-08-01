@@ -22,11 +22,11 @@ extension = Extension(
     extra_compile_args=['-std=c++0x', '-Wno-sign-compare'])
 
 setup(name='pyfasttext',
-      version='0.1',
+      version='0.1.0',
       author='Vincent Rasneur',
       author_email='vrasneur@free.fr',
       url='https://github.com/vrasneur/pyfasttext',
-      download_url='https://github.com/vrasneur/pyfasttext/releases/download/0.1/pyfasttext-0.1.tar.gz',
+      download_url='https://github.com/vrasneur/pyfasttext/releases/download/0.1.0/pyfasttext-0.1.0.tar.gz',
       description='Yet another Python binding for fastText',
       long_description=open('README.rst', 'r').read(),
       license='GPLv3',
