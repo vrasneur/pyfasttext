@@ -1,0 +1,5 @@
+global-include *.pyx
+global-include *.cpp
+global-include *.cc
+global-include *.hpp
+global-include *.h
