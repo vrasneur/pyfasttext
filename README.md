@@ -5,6 +5,41 @@ The binding supports Python 2.7 and Python 3. It requires Cython.
 
 `pyfasttext` has been tested successfully on Linux and Mac OS X.
 
+**Table of Contents**
+
+- [pyfasttext](#)
+  - [Installation](#)
+    - [Cloning](#)
+    - [Requirements for Python 2.7](#)
+    - [Building and installing](#)
+  - [Usage](#)
+    - [How to load the library?](#)
+    - [How to load an existing model?](#)
+    - [Word representation learning](#)
+      - [Training using Skipgram](#)
+      - [Training using CBoW](#)
+      - [Vector for a given word](#)
+    - [Get all the word vectors in a model](#)
+    - [Get the number of words in the model](#)
+      - [Word similarity](#)
+    - [Most similar words](#)
+      - [Analogies](#)
+    - [Text classification](#)
+      - [Supervised learning](#)
+      - [Get all the labels](#)
+      - [Get the number of labels](#)
+      - [Prediction](#)
+        - [Labels and probabilities](#)
+          - [Normalized probabilities](#)
+        - [Labels only](#)
+      - [Quantization](#)
+    - [Misc utilities](#)
+      - [Show the model (hyper)parameters](#)
+      - [Extract labels or classes from a dataset](#)
+        - [Extract labels](#)
+        - [Extract classes](#)
+    - [Exceptions](#)
+
 ## Installation
 
 To compile `pyfasttext`, make sure you have a compiler with C++11 support.
