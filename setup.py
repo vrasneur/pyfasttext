@@ -1,4 +1,4 @@
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 from Cython.Build import cythonize
 from glob import glob
 from os.path import join
@@ -31,6 +31,7 @@ setup(name='pyfasttext',
       license='GPLv3',
       package_dir = {'': 'src'},
       ext_modules=cythonize(extension),
+      install_requires=['future'],
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Intended Audience :: Developers',
