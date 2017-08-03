@@ -5,8 +5,18 @@ from os.path import join
 import os
 import sys
 
+def to_bool(val):
+    if not val:
+        val = 0
+    else:
+        try:
+            val = int(val)
+        except:
+            val = 1
+    return bool(val)
+
 # numpy support is optional
-USE_NUMPY = bool(int(os.environ.get('USE_NUMPY', 1)))
+USE_NUMPY = to_bool(os.environ.get('USE_NUMPY', '1'))
 
 include_dirs = ['.']
 install_requires = []
