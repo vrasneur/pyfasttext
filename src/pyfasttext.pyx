@@ -17,7 +17,7 @@ from libcpp.set cimport set
 from libcpp.utility cimport pair
 from libcpp.queue cimport priority_queue
 
-from array import array
+import array
 
 cdef extern from "<iostream>" namespace "std" nogil:
   cdef cppclass istream:
