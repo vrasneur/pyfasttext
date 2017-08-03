@@ -3,6 +3,21 @@ from Cython.Build import cythonize
 from glob import glob
 from os.path import join
 import os
+import sys
+
+# numpy support is optional
+USE_NUMPY = bool(int(os.environ.get('USE_NUMPY', 1)))
+
+include_dirs = ['.']
+install_requires = []
+
+if sys.version_info < (3, 0):
+    install_requires.append('future')
+
+if USE_NUMPY:
+    import numpy as np
+    include_dirs.append(np.get_include())
+    install_requires.append('numpy')
 
 cpp_dir = join('src', 'fastText', 'src')
 
@@ -17,7 +32,7 @@ extension = Extension(
     'pyfasttext',
     sources=sources,
     libraries=['pthread'],
-    include_dirs=['.'],
+    include_dirs=include_dirs,
     language='c++',
     extra_compile_args=['-std=c++0x', '-Wno-sign-compare'])
 
@@ -30,9 +45,9 @@ setup(name='pyfasttext',
       description='Yet another Python binding for fastText',
       long_description=open('README.rst', 'r').read(),
       license='GPLv3',
-      package_dir = {'': 'src'},
-      ext_modules=cythonize(extension),
-      install_requires=['future'],
+      package_dir={'': 'src'},
+      ext_modules=cythonize(extension, compile_time_env={'USE_NUMPY': USE_NUMPY}),
+      install_requires=install_requires,
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Intended Audience :: Developers',

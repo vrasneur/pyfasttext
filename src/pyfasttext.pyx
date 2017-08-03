@@ -4,7 +4,7 @@ from libc.stdint cimport int32_t, int64_t
 from libc.stdio cimport EOF
 from libc.stdlib cimport malloc, free
 from libc.math cimport exp, log
-from libc.string cimport strdup
+from libc.string cimport strdup, memcpy
 
 from builtins import bytes
 
@@ -18,6 +18,12 @@ from libcpp.utility cimport pair
 from libcpp.queue cimport priority_queue
 
 import array
+
+IF USE_NUMPY:
+  import numpy as np
+  cimport numpy as np
+
+  np.import_array()
 
 cdef extern from "<iostream>" namespace "std" nogil:
   cdef cppclass istream:
@@ -38,6 +44,7 @@ ctypedef float real
 cdef extern from "fastText/src/vector.h" namespace "fasttext" nogil:
   cdef cppclass Vector:
     Vector(int64_t)
+    real *data_
     void zero()
     int64_t size()
     real& operator[](int64_t)
@@ -263,6 +270,23 @@ cdef class FastText:
 
     return arr
 
+  IF USE_NUMPY:
+    def get_numpy_vector(self, key):
+      cdef:
+        int dim = self.ft.getDimension()
+        unique_ptr[Vector] vec = make_unique[Vector](dim)
+        np.npy_intp shape[1]
+
+      key = bytes(key, self.encoding)
+      deref(vec).zero()
+      
+      self.ft.getVector(deref(vec), key)
+      shape[0] = <np.npy_intp>(deref(vec).size())
+      arr = np.PyArray_SimpleNew(1, shape, np.NPY_FLOAT32)
+      memcpy(np.PyArray_DATA(arr), <void *>(deref(vec).data_), deref(vec).size() * sizeof(real))
+
+      return arr
+
   cdef precompute_word_vectors(self):
     if self.word_vectors:
       return
@@ -373,7 +397,7 @@ cdef class FastText:
   cdef update_label(self, encoding):
     args = get_fasttext_args(self.ft)
     if not deref(args).label.empty():
-        self.label = deref(args).label.decode(encoding)
+        self.label = str(deref(args).label.decode(encoding))
 
   def load_model(self, fname, encoding=None):
     if encoding is None:
