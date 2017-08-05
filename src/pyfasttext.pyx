@@ -48,6 +48,7 @@ cdef extern from "fastText/src/vector.h" namespace "fasttext" nogil:
     void zero()
     int64_t size()
     real& operator[](int64_t)
+    void mul(real)
     real norm()
     void addVector(const Vector &, real)
 
@@ -55,6 +56,7 @@ cdef extern from "fastText/src/matrix.h" namespace "fasttext" nogil:
   cdef cppclass Matrix:
     Matrix()
     Matrix(int64_t, int64_t)
+    real *data_
     void zero()
     void addRow(const Vector&, int64_t, real)
     real dotRow(const Vector&, int64_t)
@@ -271,7 +273,7 @@ cdef class FastText:
     return arr
 
   IF USE_NUMPY:
-    def get_numpy_vector(self, key):
+    def get_numpy_vector(self, key, normalized=False):
       cdef:
         int dim = self.ft.getDimension()
         unique_ptr[Vector] vec = make_unique[Vector](dim)
@@ -281,6 +283,8 @@ cdef class FastText:
       deref(vec).zero()
       
       self.ft.getVector(deref(vec), key)
+      if normalized:
+        deref(vec).mul(1.0 / deref(vec).norm())
       shape[0] = <np.npy_intp>(deref(vec).size())
       arr = np.PyArray_SimpleNew(1, shape, np.NPY_FLOAT32)
       memcpy(np.PyArray_DATA(arr), <void *>(deref(vec).data_), deref(vec).size() * sizeof(real))
@@ -294,6 +298,7 @@ cdef class FastText:
     cdef:
       unique_ptr[Vector] vec = make_unique[Vector](self.ft.getDimension())
       string word
+
     dict = get_fasttext_dict(self.ft)
     self.word_vectors = make_unique[Matrix](deref(dict).nwords(), self.ft.getDimension())
     deref(self.word_vectors).zero()
@@ -302,6 +307,23 @@ cdef class FastText:
       self.ft.getVector(deref(vec), word)
       norm = deref(vec).norm()
       deref(self.word_vectors).addRow(deref(vec), i, 1.0 / norm)
+
+  def uncache_word_vectors(self):
+    self.word_vectors.reset()
+
+  IF USE_NUMPY:
+    @property
+    def numpy_normalized_vectors(self):
+      self.precompute_word_vectors()
+
+      cdef:
+        int dim = self.ft.getDimension()
+        np.npy_intp shape[1]
+
+      dict = get_fasttext_dict(self.ft)
+      shape[0] = <np.npy_intp>(deref(dict).nwords() * dim)
+      arr = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT32, <void *>deref(self.word_vectors).data_)
+      return arr.reshape(deref(dict).nwords(), dim).copy()
 
   cdef find_nearest_neighbors(self, const Vector &query_vec, int32_t k,
                               const set[string] &ban_set, encoding):
