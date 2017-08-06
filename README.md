@@ -2,48 +2,21 @@
 Yet another Python binding for [fastText](https://github.com/facebookresearch/fastText).
 
 The binding supports Python 2.7 and Python 3. It requires Cython.
+Numpy is also a dependency, but is optional.
 
 `pyfasttext` has been tested successfully on Linux and Mac OS X.
-
-Table of Contents
-=================
-
-   * [pyfasttext](#pyfasttext)
-      * [Installation](#installation)
-         * [Cloning](#cloning)
-         * [Requirements for Python 2.7](#requirements-for-python-27)
-         * [Building and installing](#building-and-installing)
-      * [Usage](#usage)
-         * [How to load the library?](#how-to-load-the-library)
-         * [How to load an existing model?](#how-to-load-an-existing-model)
-         * [Word representation learning](#word-representation-learning)
-            * [Training using Skipgram](#training-using-skipgram)
-            * [Training using CBoW](#training-using-cbow)
-            * [Vector for a given word](#vector-for-a-given-word)
-         * [Get all the word vectors in a model](#get-all-the-word-vectors-in-a-model)
-         * [Get the number of words in the model](#get-the-number-of-words-in-the-model)
-            * [Word similarity](#word-similarity)
-         * [Most similar words](#most-similar-words)
-            * [Analogies](#analogies)
-         * [Text classification](#text-classification)
-            * [Supervised learning](#supervised-learning)
-            * [Get all the labels](#get-all-the-labels)
-            * [Get the number of labels](#get-the-number-of-labels)
-            * [Prediction](#prediction)
-               * [Labels and probabilities](#labels-and-probabilities)
-                  * [Normalized probabilities](#normalized-probabilities)
-               * [Labels only](#labels-only)
-            * [Quantization](#quantization)
-         * [Misc utilities](#misc-utilities)
-            * [Show the model (hyper)parameters](#show-the-model-hyperparameters)
-            * [Extract labels or classes from a dataset](#extract-labels-or-classes-from-a-dataset)
-               * [Extract labels](#extract-labels)
-               * [Extract classes](#extract-classes)
-         * [Exceptions](#exceptions)
 
 ## Installation
 
 To compile `pyfasttext`, make sure you have a compiler with C++11 support.
+
+### Simplest way to install pyfasttext: use pip
+
+Just type this line:
+
+```bash
+pip install pyfasttext
+```
 
 ### Cloning
 
@@ -68,6 +41,16 @@ pip install future
 
 ```bash
 python setup.py install
+```
+
+#### Building and installing without Numpy
+
+`pyfasttext` can export word vectors as `numpy` `ndarray`s, however this feature can be disabled at compile time.
+
+To compile without `numpy`, pyfasttext has a `USE_NUMPY` environment variable. Set this variable to 0 (or empty), like this:
+
+```bash
+USE_NUMPY=0 python setup.py install
 ```
 
 ## Usage
@@ -109,42 +92,83 @@ Just use keyword arguments in the training methods of the `FastText` object.
 >>> model.cbow(input='data.txt', output='model', epoch=100, lr=0.7)
 ```
 
-#### Vector for a given word
+### Word vectors
+
+#### Word vectors access
+
+##### Vector for a given word
+
+By default, a single word vector is returned as a regular Python array of floats.
 
 ```python
 >>> model['dog']
-array('f', [-0.4947430193424225, 8.133808296406642e-05, ...])
+array('f', [-1.308749794960022, -1.8326224088668823, ...])
 ```
 
-### Get all the word vectors in a model
+###### Numpy ndarray
+
+The `get_numpy_vector()` vector returns the word vector as a `numpy` `ndarray`.
+
+```python
+>>> model.get_numpy_vector('dog')
+array([-1.30874979, -1.83262241, ...], dtype=float32)
+```
+
+If you want a normalized vector (i.e. the vector divided by its norm), there is an optional boolean parameter named `normalized`.
+
+```python
+>>> model.get_numpy_vector('dog', normalized=True)
+array([-0.07084749, -0.09920666, ...], dtype=float32)
+```
+
+##### Get all the word vectors in a model
 
 ```python
 >>> for word in model.words:
 ...   print(word, model[word])
 ```
 
-### Get the number of words in the model
+##### Get the number of words in the model
 
 ```python
 >>> model.nwords
 500000
 ```
 
-#### Word similarity
+##### Numpy ndarray
+
+If you want all the word vectors as a big `numpy` `ndarray`, you can use the `numpy_normalized_vectors` member. Note that all these vectors are *normalized*.
+
+```python
+>>> model.nwords
+500000
+>>> model.numpy_normalized_vectors
+array([[-0.07549749, -0.09407753, ...],
+       [ 0.00635979, -0.17272158, ...],
+       ..., 
+       [-0.01009259,  0.14604086, ...],
+       [ 0.12467574, -0.0609326 , ...]], dtype=float32)
+>>> model.numpy_normalized_vectors.shape
+(500000, 100) # (number of words, dimension)
+```
+
+#### Misc operations with word vectors
+
+##### Word similarity
 
 ```python
 >>> model.similarity('dog', 'cat')
 0.75596606254577637
 ```
 
-### Most similar words
+##### Most similar words
 
 ```python
 >>> model.nearest_neighbors('dog', k=2)
 [('dogs', 0.7843924736976624), ('cat', 75596606254577637)]
 ```
 
-#### Analogies
+##### Analogies
 
 The `most_similar()` method works similarly as the one in [gensim](https://radimrehurek.com/gensim/models/keyedvectors.html).
 
