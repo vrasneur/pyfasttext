@@ -4,3 +4,5 @@ global-include *.cc
 global-include *.hpp
 global-include *.h
 global-include *.itm
+
+include README.md
