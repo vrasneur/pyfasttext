@@ -292,7 +292,9 @@ cdef class FastText:
       
       self.ft.getVector(deref(vec), key)
       if normalized:
-        deref(vec).mul(1.0 / deref(vec).norm())
+        norm = deref(vec).norm()
+        if norm > 0:
+          deref(vec).mul(1.0 / norm)
       shape[0] = <np.npy_intp>(deref(vec).size())
       arr = np.PyArray_SimpleNew(1, shape, np.NPY_FLOAT32)
       memcpy(np.PyArray_DATA(arr), <void *>(deref(vec).data_), deref(vec).size() * sizeof(real))
@@ -400,7 +402,12 @@ cdef class FastText:
     for i in range(self.ft.getDimension()):
       dp += deref(vec1)[i] * deref(vec2)[i]
 
-    return dp / (deref(vec1).norm() * deref(vec2).norm())
+    norm1 = deref(vec1).norm()
+    norm2 = deref(vec2).norm()
+
+    if norm1 > 0 and norm2 > 0:
+      return dp / (norm1 * norm2)
+    return 0.0
 
   def most_similar(self, positive=[], negative=[], k=10, encoding=None):
     self.check_loaded()
