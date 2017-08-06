@@ -92,6 +92,11 @@ cdef extern from "fastText/src/fasttext.h" namespace "fasttext" nogil:
 cdef extern from "compat.h" namespace "pyfasttext" nogil:
   unique_ptr[T] make_unique[T](...)
 
+cdef extern from "utils.h" namespace "pyfasttext" nogil:
+  cdef cppclass CStringArrayDeleter:
+    CStringArrayDeleter()
+    CStringArrayDeleter(char **, size_t)
+
 cdef extern from "fasttext_access.h" namespace "pyfasttext" nogil:
   cdef cppclass ArgValue:
     size_t index()
@@ -106,17 +111,14 @@ cdef extern from "variant/v1.2.0/variant.hpp" namespace "mpark" nogil:
 
 cdef char **to_cstring_array(list_str, encoding) except NULL:
   cdef char **ret = <char **>malloc(len(list_str) * sizeof(char *))
+  if ret == NULL:
+    return ret
+
   for i in range(len(list_str)):
     temp = strdup(bytes(list_str[i], encoding))
     ret[i] = temp
 
   return ret
-
-cdef free_cstring_array(char **arr, length):
-  for i in range(length):
-    free(arr[i])
-
-  free(arr)
 
 cdef class FastText:
   cdef:
@@ -258,6 +260,9 @@ cdef class FastText:
     return nwords
 
   def __getitem__(self, key):
+    if not self.loaded:
+      return None
+
     cdef:
       int dim = self.ft.getDimension()
       unique_ptr[Vector] vec = make_unique[Vector](dim)
@@ -274,6 +279,9 @@ cdef class FastText:
 
   IF USE_NUMPY:
     def get_numpy_vector(self, key, normalized=False):
+      if not self.loaded:
+        return None
+
       cdef:
         int dim = self.ft.getDimension()
         unique_ptr[Vector] vec = make_unique[Vector](dim)
@@ -314,6 +322,9 @@ cdef class FastText:
   IF USE_NUMPY:
     @property
     def numpy_normalized_vectors(self):
+      if not self.loaded:
+        return None
+
       self.precompute_word_vectors()
 
       cdef:
@@ -440,8 +451,9 @@ cdef class FastText:
       args.append(str(val))
 
     cdef:
-      char **c_args = to_cstring_array(args, encoding)
       shared_ptr[Args] s_args = make_shared[Args]()
+      char **c_args = to_cstring_array(args, encoding)
+      unique_ptr[CStringArrayDeleter] deleter = make_unique[CStringArrayDeleter](c_args, <size_t>len(args))
 
     deref(s_args).parseArgs(len(args), c_args)
     if command == 'quantize':
@@ -449,7 +461,6 @@ cdef class FastText:
     else:
       self.ft.train(s_args)
 
-    free_cstring_array(c_args, len(args))
     self.update_label(encoding)
     self.loaded = True
 
