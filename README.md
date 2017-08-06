@@ -6,6 +6,49 @@ Numpy is also a dependency, but is optional.
 
 `pyfasttext` has been tested successfully on Linux and Mac OS X.
 
+Table of Contents
+=================
+
+   * [pyfasttext](#pyfasttext)
+      * [Installation](#installation)
+         * [Simplest way to install pyfasttext: use pip](#simplest-way-to-install-pyfasttext-use-pip)
+         * [Cloning](#cloning)
+         * [Requirements for Python 2.7](#requirements-for-python-27)
+         * [Building and installing](#building-and-installing)
+            * [Building and installing without Numpy](#building-and-installing-without-numpy)
+      * [Usage](#usage)
+         * [How to load the library?](#how-to-load-the-library)
+         * [How to load an existing model?](#how-to-load-an-existing-model)
+         * [Word representation learning](#word-representation-learning)
+            * [Training using Skipgram](#training-using-skipgram)
+            * [Training using CBoW](#training-using-cbow)
+         * [Word vectors](#word-vectors)
+            * [Word vectors access](#word-vectors-access)
+               * [Vector for a given word](#vector-for-a-given-word)
+                  * [Numpy ndarray](#numpy-ndarray)
+               * [Get all the word vectors in a model](#get-all-the-word-vectors-in-a-model)
+               * [Get the number of words in the model](#get-the-number-of-words-in-the-model)
+                  * [Numpy ndarray](#numpy-ndarray-1)
+            * [Misc operations with word vectors](#misc-operations-with-word-vectors)
+               * [Word similarity](#word-similarity)
+               * [Most similar words](#most-similar-words)
+               * [Analogies](#analogies)
+         * [Text classification](#text-classification)
+            * [Supervised learning](#supervised-learning)
+            * [Get all the labels](#get-all-the-labels)
+            * [Get the number of labels](#get-the-number-of-labels)
+            * [Prediction](#prediction)
+               * [Labels and probabilities](#labels-and-probabilities)
+                  * [Normalized probabilities](#normalized-probabilities)
+               * [Labels only](#labels-only)
+            * [Quantization](#quantization)
+         * [Misc utilities](#misc-utilities)
+            * [Show the model (hyper)parameters](#show-the-model-hyperparameters)
+            * [Extract labels or classes from a dataset](#extract-labels-or-classes-from-a-dataset)
+               * [Extract labels](#extract-labels)
+               * [Extract classes](#extract-classes)
+         * [Exceptions](#exceptions)
+
 ## Installation
 
 To compile `pyfasttext`, make sure you have a compiler with C++11 support.
@@ -135,7 +178,7 @@ array([-0.07084749, -0.09920666, ...], dtype=float32)
 500000
 ```
 
-##### Numpy ndarray
+###### Numpy ndarray
 
 If you want all the word vectors as a big `numpy` `ndarray`, you can use the `numpy_normalized_vectors` member. Note that all these vectors are *normalized*.
 
