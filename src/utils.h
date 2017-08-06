@@ -3,8 +3,6 @@
 
 #include <cstdlib>
 
-#include <iostream>
-
 namespace pyfasttext
 {
 
