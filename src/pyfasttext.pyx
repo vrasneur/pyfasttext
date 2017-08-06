@@ -314,7 +314,8 @@ cdef class FastText:
       word = deref(dict).getWord(i)
       self.ft.getVector(deref(vec), word)
       norm = deref(vec).norm()
-      deref(self.word_vectors).addRow(deref(vec), i, 1.0 / norm)
+      if norm > 0:
+        deref(self.word_vectors).addRow(deref(vec), i, 1.0 / norm)
 
   def uncache_word_vectors(self):
     self.word_vectors.reset()
