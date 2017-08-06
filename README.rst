@@ -43,10 +43,10 @@ Table of Contents
 
             -  `Numpy ndarray <#numpy-ndarray>`__
 
-         -  `Get all the word vectors in a
-            model <#get-all-the-word-vectors-in-a-model>`__
          -  `Get the number of words in the
             model <#get-the-number-of-words-in-the-model>`__
+         -  `Get all the word vectors in a
+            model <#get-all-the-word-vectors-in-a-model>`__
 
             -  `Numpy ndarray <#numpy-ndarray-1>`__
 
@@ -208,7 +208,7 @@ of floats.
 Numpy ndarray
              
 
-The ``get_numpy_vector()`` vector returns the word vector as a ``numpy``
+The ``get_numpy_vector()`` method returns the word vector as a ``numpy``
 ``ndarray``.
 
 .. code:: python
@@ -224,14 +224,6 @@ there is an optional boolean parameter named ``normalized``.
     >>> model.get_numpy_vector('dog', normalized=True)
     array([-0.07084749, -0.09920666, ...], dtype=float32)
 
-Get all the word vectors in a model
-'''''''''''''''''''''''''''''''''''
-
-.. code:: python
-
-    >>> for word in model.words:
-    ...   print(word, model[word])
-
 Get the number of words in the model
 ''''''''''''''''''''''''''''''''''''
 
@@ -239,6 +231,14 @@ Get the number of words in the model
 
     >>> model.nwords
     500000
+
+Get all the word vectors in a model
+'''''''''''''''''''''''''''''''''''
+
+.. code:: python
+
+    >>> for word in model.words:
+    ...   print(word, model[word])
 
 Numpy ndarray
              

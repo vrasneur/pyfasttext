@@ -26,8 +26,8 @@ Table of Contents
             * [Word vectors access](#word-vectors-access)
                * [Vector for a given word](#vector-for-a-given-word)
                   * [Numpy ndarray](#numpy-ndarray)
-               * [Get all the word vectors in a model](#get-all-the-word-vectors-in-a-model)
                * [Get the number of words in the model](#get-the-number-of-words-in-the-model)
+               * [Get all the word vectors in a model](#get-all-the-word-vectors-in-a-model)
                   * [Numpy ndarray](#numpy-ndarray-1)
             * [Misc operations with word vectors](#misc-operations-with-word-vectors)
                * [Word similarity](#word-similarity)
@@ -150,7 +150,7 @@ array('f', [-1.308749794960022, -1.8326224088668823, ...])
 
 ###### Numpy ndarray
 
-The `get_numpy_vector()` vector returns the word vector as a `numpy` `ndarray`.
+The `get_numpy_vector()` method returns the word vector as a `numpy` `ndarray`.
 
 ```python
 >>> model.get_numpy_vector('dog')
@@ -164,18 +164,18 @@ If you want a normalized vector (i.e. the vector divided by its norm), there is 
 array([-0.07084749, -0.09920666, ...], dtype=float32)
 ```
 
-##### Get all the word vectors in a model
-
-```python
->>> for word in model.words:
-...   print(word, model[word])
-```
-
 ##### Get the number of words in the model
 
 ```python
 >>> model.nwords
 500000
+```
+
+##### Get all the word vectors in a model
+
+```python
+>>> for word in model.words:
+...   print(word, model[word])
 ```
 
 ###### Numpy ndarray
