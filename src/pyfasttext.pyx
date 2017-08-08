@@ -370,6 +370,15 @@ cdef class FastText:
 
     return ret
 
+  def words_for_vector(self, v, k=1, encoding='utf8'):
+    cdef:
+      unique_ptr[Vector] vec = make_unique[Vector](self.ft.getDimension())
+      set[string] ban_set
+    for i in range(deref(vec).size()):
+      deref(vec)[i]=v[i]
+    return self.find_nearest_neighbors(deref(vec), k, ban_set, encoding)
+
+
   def nearest_neighbors(self, word, k=10, encoding=None):
     self.check_loaded()
 
