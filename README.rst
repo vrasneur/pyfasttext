@@ -209,8 +209,8 @@ of floats.
 Numpy ndarray
              
 
-The ``get_numpy_vector()`` method returns the word vector as a ``numpy``
-``ndarray``.
+The ``model.get_numpy_vector(word)`` method returns the word vector as a
+``numpy`` ``ndarray``.
 
 .. code:: python
 
@@ -300,7 +300,7 @@ Most similar words
 Analogies
 '''''''''
 
-The ``most_similar()`` method works similarly as the one in
+The ``model.most_similar()`` method works similarly as the one in
 `gensim <https://radimrehurek.com/gensim/models/keyedvectors.html>`__.
 
 .. code:: python
@@ -339,7 +339,7 @@ Prediction
 ^^^^^^^^^^
 
 | To obtain the ``k`` most likely labels from test sentences, there are
-  multiple ``predict_*()`` methods.
+  multiple ``model.predict_*()`` methods.
 | The default value for ``k`` is 1. If you want to obtain all the
   possible labels, use ``None`` for ``k``.
 
@@ -376,8 +376,8 @@ For performance reasons, fastText probabilities often do not sum up to
 If you want normalized probabilities (where the sum is closer to 1.0
 than the original probabilities), you can use the ``normalized=True``
 parameter in all the methods that output probabilities
-(``predict_proba()``, ``predict_proba_file()`` and
-``predict_proba_single()``).
+(``model.predict_proba()``, ``model.predict_proba_file()`` and
+``model.predict_proba_single()``).
 
 .. code:: python
 
@@ -413,14 +413,14 @@ If you want to test a single string, use this:
 Quantization
 ^^^^^^^^^^^^
 
-Use keyword arguments in the ``quantize()`` method.
+Use keyword arguments in the ``model.quantize()`` method.
 
 .. code:: python
 
     >>> model.quantize(input='/path/to/input.txt', output='/path/to/model')
 
 You can load quantized models using the ``FastText`` constructor or the
-``load_model()`` method.
+``model.load_model()`` method.
 
 Misc utilities
 ~~~~~~~~~~~~~~
