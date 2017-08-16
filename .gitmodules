@@ -1,7 +1,3 @@
 [submodule "fastText"]
 	path = src/fastText
 	url = https://github.com/facebookresearch/fastText.git
-[submodule "variant"]
-	path = src/variant
-	url = https://github.com/mpark/variant.git
-	branch = single-header
