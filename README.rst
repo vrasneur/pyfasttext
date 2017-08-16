@@ -43,6 +43,7 @@ Table of Contents
 
             -  `Numpy ndarray <#numpy-ndarray>`__
 
+         -  `Words for a given vector <#words-for-a-given-vector>`__
          -  `Get the number of words in the
             model <#get-the-number-of-words-in-the-model>`__
          -  `Get all the word vectors in a
@@ -224,6 +225,23 @@ there is an optional boolean parameter named ``normalized``.
     >>> model.get_numpy_vector('dog', normalized=True)
     array([-0.07084749, -0.09920666, ...], dtype=float32)
 
+Words for a given vector
+''''''''''''''''''''''''
+
+| The inverse operation of ``model[word]`` or
+  ``model.get_numpy_vector(word)`` is
+  ``model.words_for_vector(vector, k)``.
+| It returns a list of the ``k`` words closest to the provided vector.
+  The default value for ``k`` is 1.
+
+.. code:: python
+
+    >>> king = model.get_numpy_vector('king')
+    >>> man = model.get_numpy_vector('man')
+    >>> woman = model.get_numpy_vector('woman')
+    >>> model.words_for_vector(king + woman - man, k=1)
+    [('queen', 0.77121970653533936)]
+
 Get the number of words in the model
 ''''''''''''''''''''''''''''''''''''
 
@@ -322,7 +340,8 @@ Prediction
 
 | To obtain the ``k`` most likely labels from test sentences, there are
   multiple ``predict_*()`` methods.
-| If you want to obtain all the possible labels, use ``None`` for ``k``.
+| The default value for ``k`` is 1. If you want to obtain all the
+  possible labels, use ``None`` for ``k``.
 
 Labels and probabilities
 ''''''''''''''''''''''''

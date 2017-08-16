@@ -26,6 +26,7 @@ Table of Contents
             * [Word vectors access](#word-vectors-access)
                * [Vector for a given word](#vector-for-a-given-word)
                   * [Numpy ndarray](#numpy-ndarray)
+               * [Words for a given vector](#words-for-a-given-vector)
                * [Get the number of words in the model](#get-the-number-of-words-in-the-model)
                * [Get all the word vectors in a model](#get-all-the-word-vectors-in-a-model)
                   * [Numpy ndarray](#numpy-ndarray-1)
@@ -165,15 +166,15 @@ array([-0.07084749, -0.09920666, ...], dtype=float32)
 ```
 ##### Words for a given vector
 
-The inverse operation of `model[word]` or `model.get_numpy_vector(word)` is `model.words_for_vector(vector,k,encoding)`: 
-It returns a list of the `k` words closest to the provided vector.
+The inverse operation of `model[word]` or `model.get_numpy_vector(word)` is `model.words_for_vector(vector, k)`.  
+It returns a list of the `k` words closest to the provided vector. The default value for `k` is 1.
 
 ```python
 >>> king = model.get_numpy_vector('king')
 >>> man = model.get_numpy_vector('man')
 >>> woman = model.get_numpy_vector('woman')
 >>> model.words_for_vector(king + woman - man, k=1)
-['queen']
+[('queen', 0.77121970653533936)]
 ```
 
 ##### Get the number of words in the model
@@ -258,7 +259,7 @@ The `most_similar()` method works similarly as the one in [gensim](https://radim
 #### Prediction
 
 To obtain the `k` most likely labels from test sentences, there are multiple `predict_*()` methods.  
-If you want to obtain all the possible labels, use `None` for `k`.
+The default value for `k` is 1. If you want to obtain all the possible labels, use `None` for `k`.
 
 ##### Labels and probabilities
 
