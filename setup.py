@@ -18,7 +18,7 @@ def to_bool(val):
 # numpy support is optional
 USE_NUMPY = to_bool(os.environ.get('USE_NUMPY', '1'))
 
-include_dirs = ['.']
+include_dirs = ['.', 'src/variant/include']
 install_requires = ['future']
 
 if USE_NUMPY:

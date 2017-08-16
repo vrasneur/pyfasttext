@@ -6,7 +6,7 @@
 
 #include "fastText/src/fasttext.h"
 
-#include "variant/v1.2.0/variant.hpp"
+#include "variant/include/mapbox/variant.hpp"
 
 namespace pyfasttext
 {
@@ -15,7 +15,7 @@ std::shared_ptr<fasttext::Dictionary>& get_fasttext_dict(fasttext::FastText &ft)
 
 std::shared_ptr<fasttext::Args>& get_fasttext_args(fasttext::FastText &ft);
 
-using ArgValue = mpark::variant<bool, int, size_t, double, std::string, fasttext::loss_name, fasttext::model_name>;
+using ArgValue = mapbox::util::variant<bool, int, size_t, double, std::string, fasttext::loss_name, fasttext::model_name>;
 
 std::map<std::string, ArgValue> get_args_map(const std::shared_ptr<fasttext::Args> &args);
 

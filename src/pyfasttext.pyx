@@ -99,14 +99,14 @@ cdef extern from "utils.h" namespace "pyfasttext" nogil:
 
 cdef extern from "fasttext_access.h" namespace "pyfasttext" nogil:
   cdef cppclass ArgValue:
-    size_t index()
+    size_t which()
   cdef shared_ptr[Dictionary] &get_fasttext_dict(CFastText&)
   cdef shared_ptr[Args] &get_fasttext_args(CFastText&)
   cdef map[string, ArgValue] get_args_map(shared_ptr[Args]&)
   string convert_loss_name(loss_name)
   string convert_model_name(model_name)
 
-cdef extern from "variant/v1.2.0/variant.hpp" namespace "mpark" nogil:
+cdef extern from "variant/include/mapbox/variant.hpp" namespace "mapbox::util" nogil:
   T get[T](ArgValue&)
 
 cdef char **to_cstring_array(list_str, encoding) except NULL:
@@ -213,7 +213,7 @@ cdef class FastText:
     args_map = get_args_map(args)
     for item in args_map:
       key = item.first.decode(self.encoding)
-      index = item.second.index()
+      index = item.second.which()
       if index == 0:
         ret[key] = get[bool](item.second)
       elif index == 1:
