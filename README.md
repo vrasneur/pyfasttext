@@ -163,6 +163,18 @@ If you want a normalized vector (i.e. the vector divided by its norm), there is 
 >>> model.get_numpy_vector('dog', normalized=True)
 array([-0.07084749, -0.09920666, ...], dtype=float32)
 ```
+##### Words for a given vector
+
+The inverse operation of `model[word]` or `model.get_numpy_vector(word)` is `model.words_for_vector(vector,k,encoding)`: 
+It returns a list of the `k` words closest to the provided vector.
+
+```python
+>>> king = model.get_numpy_vector('king')
+>>> man = model.get_numpy_vector('man')
+>>> woman = model.get_numpy_vector('woman')
+>>> model.words_for_vector(king + woman - man, k=1)
+['queen']
+```
 
 ##### Get the number of words in the model
 
