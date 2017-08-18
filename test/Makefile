@@ -5,6 +5,7 @@ all: test
 
 test: $(CACHE_TEXT)
 	python -m doctest test.txt "$(CACHE_TEXT)"
+	@echo "All tests are OK!"
 
 $(CACHE_DIR):
 	mkdir -p $@
