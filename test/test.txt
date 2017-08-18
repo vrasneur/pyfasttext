@@ -1,0 +1,21 @@
+>>> from sys import argv
+>>> input_file = argv[-1]
+
+import the pyfasttext module
+>>> from pyfasttext import FastText
+
+Train a new model with the enwik8 dataset (using skipgram)
+>>> model = FastText()
+>>> model.skipgram(input=input_file, output='enwik8_model')
+
+Test that the model is correct
+>>> nn = model.nearest_neighbors('queen', 10) 
+>>> len(nn) == 10
+True
+
+Reload the model file
+>>> model = FastText('enwik8_model.bin')
+
+Test that the answer is the same as before
+>>> model.nearest_neighbors('queen', 10) == nn
+True

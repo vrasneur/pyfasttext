@@ -5,3 +5,7 @@ python:
 install:
   - 'pip install -r requirements.txt'
   - 'python setup.py install'
+cache:
+  directories:
+    - '$HOME/.cache/pyfasttext'
+script: 'make -C test'
