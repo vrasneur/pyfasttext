@@ -2,4 +2,6 @@ language: python
 python:
   - '2.7'
   - '3.5'
-install: 'python setup.py install'
+install:
+  - 'pip install -r requirements.txt'
+  - 'python setup.py install'
