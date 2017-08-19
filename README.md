@@ -1,7 +1,7 @@
 # pyfasttext
 Yet another Python binding for [fastText](https://github.com/facebookresearch/fastText).
 
-The binding supports Python 2.7 and Python 3. It requires Cython.
+The binding supports Python 2.6, 2.7 and Python 3. It requires Cython.
 Numpy is also a dependency, but is optional.
 
 `pyfasttext` has been tested successfully on Linux and Mac OS X.
