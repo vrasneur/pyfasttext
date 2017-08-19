@@ -62,6 +62,7 @@ setup(name='pyfasttext',
           'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
           'Programming Language :: C++',
           'Programming Language :: Cython',
+          'Programming Language :: Python :: 2.6',
           'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3',
           'Topic :: Scientific/Engineering :: Artificial Intelligence'
