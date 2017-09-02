@@ -440,12 +440,12 @@ cdef class FastText:
 
   def train(self, command, **kwargs):
     cdef vector[string] args
-    args.push_back('fastText'.encode(self.encoding))
-    args.push_back(command.encode(self.encoding))
+    args.push_back(bytes('fastText', self.encoding))
+    args.push_back(bytes(command, self.encoding))
 
     for key, val in kwargs.items():
-      args.push_back(('-' + key).encode(self.encoding))
-      args.push_back(str(val).encode(self.encoding))
+      args.push_back(bytes('-' + key, self.encoding))
+      args.push_back(bytes(str(val), self.encoding))
 
     cdef shared_ptr[Args] s_args = make_shared[Args]()
 
