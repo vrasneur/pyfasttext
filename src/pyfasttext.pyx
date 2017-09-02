@@ -126,24 +126,21 @@ cdef class FastText:
     if not self.loaded:
       raise RuntimeError('model not loaded!')
 
-  def extract_labels(self, fname, encoding=None):
+  def extract_labels(self, fname):
     labels = []
 
     if self.label is None:
       return labels
 
-    if encoding is None:
-      encoding = self.encoding
-
-    with open(fname, 'r', encoding=encoding) as f:
+    with open(fname, 'r', encoding=self.encoding) as f:
       for line in f:
         labels.append([label.replace(self.label, '') for label in line.split()
 	               if label.startswith(self.label)])
       
     return labels
 
-  def extract_classes(self, fname, encoding=None):
-    labels = self.extract_labels(fname, encoding=encoding)
+  def extract_classes(self, fname):
+    labels = self.extract_labels(fname)
     return [label[0] if label else None
             for label in labels]
 
@@ -326,7 +323,7 @@ cdef class FastText:
       return arr.reshape(deref(dict).nwords(), dim).copy()
 
   cdef find_nearest_neighbors(self, const Vector &query_vec, int32_t k,
-                              const set[string] &ban_set, encoding):
+                              const set[string] &ban_set):
     self.precompute_word_vectors()
 
     cdef:
@@ -349,18 +346,15 @@ cdef class FastText:
     while i < k and heap.size() > 0:
       it = ban_set.find(heap.top().second)
       if it == ban_set.end():
-        ret.append((heap.top().second.decode(encoding), heap.top().first))
+        ret.append((heap.top().second.decode(self.encoding), heap.top().first))
         i += 1
 
       heap.pop()
 
     return ret
 
-  def words_for_vector(self, v, k=1, encoding=None):
+  def words_for_vector(self, v, k=1):
     self.check_loaded()
-
-    if encoding is None:
-      encoding = self.encoding
 
     cdef:
       unique_ptr[Vector] vec = make_unique[Vector](self.ft.getDimension())
@@ -372,30 +366,24 @@ cdef class FastText:
     deref(vec).zero()
     for i in range(deref(vec).size()):
       deref(vec)[i] = v[i]
-    return self.find_nearest_neighbors(deref(vec), k, ban_set, encoding)
+    return self.find_nearest_neighbors(deref(vec), k, ban_set)
 
-  def nearest_neighbors(self, word, k=10, encoding=None):
+  def nearest_neighbors(self, word, k=10):
     self.check_loaded()
 
-    if encoding is None:
-      encoding = self.encoding
-
-    word = bytes(word, encoding)
+    word = bytes(word, self.encoding)
     cdef:
       unique_ptr[Vector] vec = make_unique[Vector](self.ft.getDimension())
       set[string] ban_set
     ban_set.insert(word)
     self.ft.getVector(deref(vec), word)
-    return self.find_nearest_neighbors(deref(vec), k, ban_set, encoding)
+    return self.find_nearest_neighbors(deref(vec), k, ban_set)
 
-  def similarity(self, word1, word2, encoding=None):
+  def similarity(self, word1, word2):
     self.check_loaded()
 
-    if encoding is None:
-      encoding = self.encoding
-
-    word1 = bytes(word1, encoding)
-    word2 = bytes(word2, encoding)
+    word1 = bytes(word1, self.encoding)
+    word2 = bytes(word2, self.encoding)
     cdef:
       unique_ptr[Vector] vec1 = make_unique[Vector](self.ft.getDimension())
       unique_ptr[Vector] vec2 = make_unique[Vector](self.ft.getDimension())
@@ -413,11 +401,8 @@ cdef class FastText:
       return dp / (norm1 * norm2)
     return 0.0
 
-  def most_similar(self, positive=[], negative=[], k=10, encoding=None):
+  def most_similar(self, positive=[], negative=[], k=10):
     self.check_loaded()
-
-    if encoding is None:
-      encoding = self.encoding
 
     self.precompute_word_vectors()
 
@@ -428,38 +413,32 @@ cdef class FastText:
 
     deref(query).zero()
     for word in positive:
-      word = bytes(word, encoding)
+      word = bytes(word, self.encoding)
       ban_set.insert(word)
       self.ft.getVector(deref(buffer), word)
       deref(query).addVector(deref(buffer), 1.0)
     for word in negative:
-      word = bytes(word, encoding)
+      word = bytes(word, self.encoding)
       ban_set.insert(word)
       self.ft.getVector(deref(buffer), word)
       deref(query).addVector(deref(buffer), -1.0)
-    return self.find_nearest_neighbors(deref(query), k, ban_set, encoding)
+    return self.find_nearest_neighbors(deref(query), k, ban_set)
 
-  cdef update_label(self, encoding):
+  cdef update_label(self):
     args = get_fasttext_args(self.ft)
     if not deref(args).label.empty():
-        self.label = str(deref(args).label.decode(encoding))
+        self.label = str(deref(args).label.decode(self.encoding))
 
-  def load_model(self, fname, encoding=None):
-    if encoding is None:
-      encoding = self.encoding
-
-    fname = bytes(fname, encoding)
+  def load_model(self, fname):
+    fname = bytes(fname, self.encoding)
     if check_model(self.ft, fname):
       self.ft.loadModel(fname)
     else:
       load_older_model(self.ft, fname)
-    self.update_label(encoding)
+    self.update_label()
     self.loaded = True
 
-  def train(self, command, encoding=None, **kwargs):
-    if encoding is None:
-      encoding = self.encoding
-
+  def train(self, command, **kwargs):
     args = ['fastText', command]
     for key, val in kwargs.items():
       args.append('-' + key)
@@ -473,35 +452,32 @@ cdef class FastText:
     else:
       self.ft.train(s_args)
 
-    self.update_label(encoding)
+    self.update_label()
     self.loaded = True
 
-  def skipgram(self, encoding=None, **kwargs):
-    self.train('skipgram', encoding=encoding, **kwargs)
+  def skipgram(self, **kwargs):
+    self.train('skipgram', **kwargs)
 
-  def cbow(self, encoding=None, **kwargs):
-    self.train('cbow', encoding=encoding, **kwargs)
+  def cbow(self, **kwargs):
+    self.train('cbow', **kwargs)
 
-  def supervised(self, encoding=None, **kwargs):
-    self.train('supervised', encoding=encoding, **kwargs)
+  def supervised(self, **kwargs):
+    self.train('supervised', **kwargs)
 
-  def quantize(self, encoding=None, **kwargs):
-    self.train('quantize', encoding=encoding, **kwargs)
+  def quantize(self, **kwargs):
+    self.train('quantize', **kwargs)
 
-  def test(self, fname, k=1, encoding=None):
+  def test(self, fname, k=1):
     if k is None:
       k = self.nlabels
 
-    if encoding is None:
-      encoding = self.encoding
-
-    fname = bytes(fname, encoding)
+    fname = bytes(fname, self.encoding)
     cdef unique_ptr[ifstream] ifs = make_unique[ifstream](<string>fname)
 
     self.ft.test(deref(ifs), k)
 
   cdef convert_c_predictions_proba(self, vector[pair[real, string]] &c_predictions,
-                                   bool normalized, str encoding):
+                                   bool normalized):
     log_sum = 0.0
     if normalized and not c_predictions.empty():
       # fasttext probabilities are never zero, and are in descending order
@@ -516,7 +492,7 @@ cdef class FastText:
       if normalized:
          proba -= log_sum
       proba = exp(proba)
-      label = c_pred.second.decode(encoding)
+      label = c_pred.second.decode(self.encoding)
       if self.label is not None:
         label = label.replace(self.label, '')
 
@@ -524,11 +500,10 @@ cdef class FastText:
 
     return preds
 
-  cdef convert_c_predictions(self, vector[pair[real, string]] &c_predictions,
-                             str encoding):
+  cdef convert_c_predictions(self, vector[pair[real, string]] &c_predictions):
     preds = []
     for c_pred in c_predictions:
-      label = c_pred.second.decode(encoding)
+      label = c_pred.second.decode(self.encoding)
       if self.label is not None:
         label = label.replace(self.label, '')
 
@@ -536,14 +511,11 @@ cdef class FastText:
 
     return preds
 
-  cdef predict_aux(self, lines, k, bool proba, bool normalized, str encoding):
+  cdef predict_aux(self, lines, k, bool proba, bool normalized):
     self.check_loaded()
 
     if k is None:
       k = self.nlabels
-
-    if encoding is None:
-      encoding = self.encoding
 
     cdef:
       unique_ptr[istringstream] iss = make_unique[istringstream]()
@@ -551,39 +523,36 @@ cdef class FastText:
 
     predictions = []
     for line in lines:
-      line = bytes(line, encoding)
+      line = bytes(line, self.encoding)
       deref(iss).str(line)
       self.ft.predict(deref(iss), k, c_predictions)
 
       if proba:
-        predictions.append(self.convert_c_predictions_proba(c_predictions, normalized, encoding))
+        predictions.append(self.convert_c_predictions_proba(c_predictions, normalized))
       else:
-        predictions.append(self.convert_c_predictions(c_predictions, encoding))
+        predictions.append(self.convert_c_predictions(c_predictions))
 
     return predictions
 
-  def predict_proba(self, lines, k=1, normalized=False, encoding=None):
-    return self.predict_aux(lines, k=k, proba=True, normalized=normalized, encoding=encoding)
+  def predict_proba(self, lines, k=1, normalized=False):
+    return self.predict_aux(lines, k=k, proba=True, normalized=normalized)
 
-  def predict(self, lines, k=1, encoding=None):
-    return self.predict_aux(lines, k=k, proba=False, normalized=False, encoding=encoding)
+  def predict(self, lines, k=1):
+    return self.predict_aux(lines, k=k, proba=False, normalized=False)
 
-  def predict_proba_single(self, line, k=1, normalized=False, encoding=None):
-    return self.predict_proba([line], k=k, normalized=normalized, encoding=encoding)[0]
+  def predict_proba_single(self, line, k=1, normalized=False):
+    return self.predict_proba([line], k=k, normalized=normalized)[0]
 
-  def predict_single(self, line, k=1, encoding=None):
-    return self.predict([line], k=k, encoding=encoding)[0]
+  def predict_single(self, line, k=1):
+    return self.predict([line], k=k)[0]
 
-  cdef predict_aux_file(self, fname, k, bool proba, bool normalized, str encoding):
+  cdef predict_aux_file(self, fname, k, bool proba, bool normalized):
     self.check_loaded()
 
     if k is None:
       k = self.nlabels
 
-    if encoding is None:
-      encoding = self.encoding
-
-    fname = bytes(fname, encoding)
+    fname = bytes(fname, self.encoding)
     cdef:
       unique_ptr[ifstream] ifs = make_unique[ifstream](<string>fname)
       vector[pair[real, string]] c_predictions
@@ -593,13 +562,13 @@ cdef class FastText:
       self.ft.predict(deref(ifs), k, c_predictions)
 
       if proba:
-        predictions.append(self.convert_c_predictions_proba(c_predictions, normalized, encoding))
+        predictions.append(self.convert_c_predictions_proba(c_predictions, normalized))
       else:
-        predictions.append(self.convert_c_predictions(c_predictions, encoding))
+        predictions.append(self.convert_c_predictions(c_predictions))
     return predictions
 
-  def predict_proba_file(self, fname, k=1, normalized=False, encoding=None):
-    return self.predict_aux_file(fname, k=k, proba=True, normalized=normalized, encoding=encoding)
+  def predict_proba_file(self, fname, k=1, normalized=False):
+    return self.predict_aux_file(fname, k=k, proba=True, normalized=normalized)
 
-  def predict_file(self, fname, k=1, encoding=None):
-    return self.predict_aux_file(fname, k=k, proba=False, normalized=False, encoding=encoding)
+  def predict_file(self, fname, k=1):
+    return self.predict_aux_file(fname, k=k, proba=False, normalized=False)
