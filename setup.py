@@ -5,6 +5,8 @@ from os.path import join
 import os
 import sys
 
+VERSION = '0.3.0'
+
 def to_bool(val):
     if not val:
         val = 0
@@ -44,11 +46,11 @@ extension = Extension(
     extra_compile_args=['-std=c++0x', '-Wno-sign-compare'])
 
 setup(name='pyfasttext',
-      version='0.2.2',
+      version=VERSION,
       author='Vincent Rasneur',
       author_email='vrasneur@free.fr',
       url='https://github.com/vrasneur/pyfasttext',
-      download_url='https://github.com/vrasneur/pyfasttext/releases/download/0.2.2/pyfasttext-0.2.2.tar.gz',
+      download_url='https://github.com/vrasneur/pyfasttext/releases/download/%s/pyfasttext-%s.tar.gz' % (VERSION, VERSION),
       description='Yet another Python binding for fastText',
       long_description=open('README.rst', 'r').read(),
       license='GPLv3',
