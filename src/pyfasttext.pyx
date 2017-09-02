@@ -439,10 +439,13 @@ cdef class FastText:
     self.loaded = True
 
   def train(self, command, **kwargs):
-    args = ['fastText', command]
+    cdef vector[string] args
+    args.push_back('fastText'.encode(self.encoding))
+    args.push_back(command.encode(self.encoding))
+
     for key, val in kwargs.items():
-      args.append('-' + key)
-      args.append(str(val))
+      args.push_back(('-' + key).encode(self.encoding))
+      args.push_back(str(val).encode(self.encoding))
 
     cdef shared_ptr[Args] s_args = make_shared[Args]()
 
