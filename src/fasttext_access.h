@@ -11,9 +11,13 @@
 namespace pyfasttext
 {
 
-std::shared_ptr<fasttext::Dictionary>& get_fasttext_dict(fasttext::FastText &ft);
+bool check_model(fasttext::FastText &ft, const std::string &fname);
+
+void load_older_model(fasttext::FastText &ft, const std::string &fname);
 
 std::shared_ptr<fasttext::Args>& get_fasttext_args(fasttext::FastText &ft);
+
+std::shared_ptr<fasttext::Dictionary>& get_fasttext_dict(fasttext::FastText &ft);
 
 using ArgValue = mapbox::util::variant<bool, int, size_t, double, std::string, fasttext::loss_name, fasttext::model_name>;
 

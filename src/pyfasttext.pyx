@@ -100,6 +100,8 @@ cdef extern from "utils.h" namespace "pyfasttext" nogil:
 cdef extern from "fasttext_access.h" namespace "pyfasttext" nogil:
   cdef cppclass ArgValue:
     size_t which()
+  bool check_model(CFastText&, string&)
+  void load_older_model(CFastText&, string&)
   cdef shared_ptr[Dictionary] &get_fasttext_dict(CFastText&)
   cdef shared_ptr[Args] &get_fasttext_args(CFastText&)
   cdef map[string, ArgValue] get_args_map(shared_ptr[Args]&)
@@ -463,7 +465,10 @@ cdef class FastText:
       encoding = self.encoding
 
     fname = bytes(fname, encoding)
-    self.ft.loadModel(fname)
+    if check_model(self.ft, fname):
+      self.ft.loadModel(fname)
+    else:
+      load_older_model(self.ft, fname)
     self.update_label(encoding)
     self.loaded = True
 
