@@ -69,7 +69,7 @@ cdef extern from "fastText/src/args.h" namespace "fasttext" nogil:
   cdef cppclass Args:
     Args()
     string label
-    void parseArgs(int, char **) except +
+    void parseArgs(vector[string]&) except +
 
 cdef extern from "fastText/src/dictionary.h" namespace "fasttext" nogil:
   cdef cppclass Dictionary:
@@ -92,11 +92,6 @@ cdef extern from "fastText/src/fasttext.h" namespace "fasttext" nogil:
 cdef extern from "compat.h" namespace "pyfasttext" nogil:
   unique_ptr[T] make_unique[T](...)
 
-cdef extern from "utils.h" namespace "pyfasttext" nogil:
-  cdef cppclass CStringArrayDeleter:
-    CStringArrayDeleter()
-    CStringArrayDeleter(char **, size_t)
-
 cdef extern from "fasttext_access.h" namespace "pyfasttext" nogil:
   cdef cppclass ArgValue:
     size_t which()
@@ -110,17 +105,6 @@ cdef extern from "fasttext_access.h" namespace "pyfasttext" nogil:
 
 cdef extern from "variant/include/mapbox/variant.hpp" namespace "mapbox::util" nogil:
   T get[T](ArgValue&)
-
-cdef char **to_cstring_array(list_str, encoding) except NULL:
-  cdef char **ret = <char **>malloc(len(list_str) * sizeof(char *))
-  if ret == NULL:
-    return ret
-
-  for i in range(len(list_str)):
-    temp = strdup(bytes(list_str[i], encoding))
-    ret[i] = temp
-
-  return ret
 
 cdef class FastText:
   cdef:
@@ -481,12 +465,9 @@ cdef class FastText:
       args.append('-' + key)
       args.append(str(val))
 
-    cdef:
-      shared_ptr[Args] s_args = make_shared[Args]()
-      char **c_args = to_cstring_array(args, encoding)
-      unique_ptr[CStringArrayDeleter] deleter = make_unique[CStringArrayDeleter](c_args, <size_t>len(args))
+    cdef shared_ptr[Args] s_args = make_shared[Args]()
 
-    deref(s_args).parseArgs(len(args), c_args)
+    deref(s_args).parseArgs(args)
     if command == 'quantize':
       self.ft.quantize(s_args)
     else:
