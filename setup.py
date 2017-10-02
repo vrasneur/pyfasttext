@@ -21,7 +21,7 @@ def to_bool(val):
 USE_NUMPY = to_bool(os.environ.get('USE_NUMPY', '1'))
 
 include_dirs = ['.', 'src/variant/include']
-install_requires = ['future']
+install_requires = ['cysignals', 'future']
 
 if USE_NUMPY:
     import numpy as np

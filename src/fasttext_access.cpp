@@ -18,6 +18,7 @@ ALLOW_MEMBER_ACCESS(FastText, std::shared_ptr<Matrix>, output_);
 ALLOW_MEMBER_ACCESS(FastText, std::shared_ptr<QMatrix>, qinput_);
 ALLOW_MEMBER_ACCESS(FastText, std::shared_ptr<QMatrix>, qoutput_);
 ALLOW_MEMBER_ACCESS(FastText, std::shared_ptr<Model>, model_);
+ALLOW_MEMBER_ACCESS(FastText, std::atomic<int64_t>, tokenCount);
 ALLOW_MEMBER_ACCESS(FastText, bool, quant_);
 ALLOW_METHOD_ACCESS(FastText, bool, std::istream&, checkModel);
 
@@ -123,6 +124,14 @@ std::shared_ptr<Args> &get_fasttext_args(FastText &ft)
 std::shared_ptr<Dictionary> &get_fasttext_dict(FastText &ft)
 {
   return ACCESS(ft, dict_);
+}
+
+void set_fasttext_max_tokenCount(FastText &ft)
+{
+  const auto &dict = get_fasttext_dict(ft);
+  const auto &args = get_fasttext_args(ft);
+  
+  ACCESS(ft, tokenCount) = args->epoch * dict->ntokens();
 }
 
 std::map<std::string, ArgValue> get_args_map(const std::shared_ptr<Args> &args)

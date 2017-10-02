@@ -17,6 +17,8 @@ from libcpp.set cimport set
 from libcpp.utility cimport pair
 from libcpp.queue cimport priority_queue
 
+from cysignals.signals cimport sig_on, sig_off, sig_check
+
 import array
 
 IF USE_NUMPY:
@@ -98,6 +100,7 @@ cdef extern from "fasttext_access.h" namespace "pyfasttext" nogil:
   bool check_model(CFastText&, string&) except +
   void load_older_model(CFastText&, string&) except +
   cdef shared_ptr[Dictionary] &get_fasttext_dict(CFastText&)
+  cdef void set_fasttext_max_tokenCount(CFastText&)
   cdef shared_ptr[Args] &get_fasttext_args(CFastText&)
   cdef map[string, ArgValue] get_args_map(shared_ptr[Args]&)
   string convert_loss_name(loss_name)
@@ -296,6 +299,7 @@ cdef class FastText:
     self.word_vectors = make_unique[Matrix](deref(dict).nwords(), self.ft.getDimension())
     deref(self.word_vectors).zero()
     for i in range(deref(dict).nwords()):
+      sig_check()
       word = deref(dict).getWord(i)
       self.ft.getVector(deref(vec), word)
       norm = deref(vec).norm()
@@ -339,11 +343,13 @@ cdef class FastText:
       query_norm = 1.0
     dict = get_fasttext_dict(self.ft)
     for idx in range(deref(dict).nwords()):
+      sig_check()
       word = deref(dict).getWord(idx)
       dp = deref(self.word_vectors).dotRow(query_vec, idx)
       heap.push(pair[real, string](dp / query_norm, word))
 
     while i < k and heap.size() > 0:
+      sig_check()
       it = ban_set.find(heap.top().second)
       if it == ban_set.end():
         ret.append((heap.top().second.decode(self.encoding), heap.top().first))
@@ -450,10 +456,19 @@ cdef class FastText:
     cdef shared_ptr[Args] s_args = make_shared[Args]()
 
     deref(s_args).parseArgs(args)
-    if command == 'quantize':
-      self.ft.quantize(s_args)
-    else:
-      self.ft.train(s_args)
+    try:
+      if command == 'quantize':
+        sig_on()
+        self.ft.quantize(s_args)
+        sig_off()
+      else:
+        sig_on()
+        self.ft.train(s_args)
+        sig_off()
+    except:
+      # make the other threads finish
+      set_fasttext_max_tokenCount(self.ft)
+      raise
 
     self.update_label()
     self.loaded = True
@@ -528,7 +543,9 @@ cdef class FastText:
     for line in lines:
       line = bytes(line, self.encoding)
       deref(iss).str(line)
+      sig_on()
       self.ft.predict(deref(iss), k, c_predictions)
+      sig_off()
 
       if proba:
         predictions.append(self.convert_c_predictions_proba(c_predictions, normalized))
