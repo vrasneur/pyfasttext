@@ -48,10 +48,10 @@ cdef extern from "fastText/src/vector.h" namespace "fasttext" nogil:
     Vector(int64_t)
     real *data_
     void zero()
-    int64_t size()
-    real& operator[](int64_t)
+    int64_t size() const
+    real& operator[](int64_t) const
     void mul(real)
-    real norm()
+    real norm() const
     void addVector(const Vector &, real)
 
 cdef extern from "fastText/src/matrix.h" namespace "fasttext" nogil:
@@ -61,7 +61,7 @@ cdef extern from "fastText/src/matrix.h" namespace "fasttext" nogil:
     real *data_
     void zero()
     void addRow(const Vector&, int64_t, real)
-    real dotRow(const Vector&, int64_t)
+    real dotRow(const Vector&, int64_t) const
 
 cdef extern from "fastText/src/args.h" namespace "fasttext" nogil:
   cdef enum loss_name:
@@ -75,21 +75,22 @@ cdef extern from "fastText/src/args.h" namespace "fasttext" nogil:
 
 cdef extern from "fastText/src/dictionary.h" namespace "fasttext" nogil:
   cdef cppclass Dictionary:
-    int32_t nlabels()
-    string getLabel(int32_t)
-    int32_t nwords()
-    string getWord(int32_t)
+    int32_t nlabels() const
+    string getLabel(int32_t) const
+    int32_t nwords() const
+    string getWord(int32_t) const
 
 cdef extern from "fastText/src/fasttext.h" namespace "fasttext" nogil:
   cdef cppclass CFastText "fasttext::FastText":
     FastText() except +
-    int getDimension()
-    void getVector(Vector&, const string&)
+    shared_ptr[const Dictionary] getDictionary() const
+    int getDimension() const
+    void getVector(Vector&, const string&) const
     void loadModel(const string&) except +
     void train(shared_ptr[Args]) except +
     void quantize(shared_ptr[Args]) except +
     void test(istream&, int32_t)
-    void predict(istream&, int32_t, vector[pair[real, string]]&)
+    void predict(istream&, int32_t, vector[pair[real, string]]&) const
 
 cdef extern from "compat.h" namespace "pyfasttext" nogil:
   unique_ptr[T] make_unique[T](...)
@@ -97,17 +98,16 @@ cdef extern from "compat.h" namespace "pyfasttext" nogil:
 cdef extern from "fasttext_access.h" namespace "pyfasttext" nogil:
   cdef cppclass ArgValue:
     size_t which()
-  bool check_model(CFastText&, string&) except +
-  void load_older_model(CFastText&, string&) except +
-  cdef shared_ptr[Dictionary] &get_fasttext_dict(CFastText&)
+  bool check_model(const CFastText&, const string&) except +
+  void load_older_model(CFastText&, const string&) except +
   cdef void set_fasttext_max_tokenCount(CFastText&)
-  cdef shared_ptr[Args] &get_fasttext_args(CFastText&)
-  cdef map[string, ArgValue] get_args_map(shared_ptr[Args]&)
-  string convert_loss_name(loss_name)
-  string convert_model_name(model_name)
+  cdef shared_ptr[const Args] get_fasttext_args(const CFastText&)
+  cdef map[string, ArgValue] get_args_map(const shared_ptr[const Args]&)
+  string convert_loss_name(const loss_name)
+  string convert_model_name(const model_name)
 
 cdef extern from "variant/include/mapbox/variant.hpp" namespace "mapbox::util" nogil:
-  T get[T](ArgValue&)
+  T get[T](const ArgValue&)
 
 cdef class FastText:
   cdef:
@@ -163,7 +163,7 @@ cdef class FastText:
     if not self.loaded:
       return labels
 
-    dict = get_fasttext_dict(self.ft)
+    dict = self.ft.getDictionary()
     nlabels = deref(dict).nlabels()
 
     for i in range(nlabels):
@@ -181,7 +181,7 @@ cdef class FastText:
     if not self.loaded:
       return nlabels
 
-    dict = get_fasttext_dict(self.ft)
+    dict = self.ft.getDictionary()
     nlabels = deref(dict).nlabels()
 
     return nlabels
@@ -224,7 +224,7 @@ cdef class FastText:
     if not self.loaded:
       return words
 
-    dict = get_fasttext_dict(self.ft)
+    dict = self.ft.getDictionary()
     nwords = deref(dict).nwords()
 
     for i in range(nwords):
@@ -240,7 +240,7 @@ cdef class FastText:
     if not self.loaded:
       return nwords
 
-    dict = get_fasttext_dict(self.ft)
+    dict = self.ft.getDictionary()
     nwords = deref(dict).nwords()
 
     return nwords
@@ -295,7 +295,7 @@ cdef class FastText:
       unique_ptr[Vector] vec = make_unique[Vector](self.ft.getDimension())
       string word
 
-    dict = get_fasttext_dict(self.ft)
+    dict = self.ft.getDictionary()
     self.word_vectors = make_unique[Matrix](deref(dict).nwords(), self.ft.getDimension())
     deref(self.word_vectors).zero()
     for i in range(deref(dict).nwords()):
@@ -321,7 +321,7 @@ cdef class FastText:
         int dim = self.ft.getDimension()
         np.npy_intp shape[1]
 
-      dict = get_fasttext_dict(self.ft)
+      dict = self.ft.getDictionary()
       shape[0] = <np.npy_intp>(deref(dict).nwords() * dim)
       arr = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT32, <void *>deref(self.word_vectors).data_)
       return arr.reshape(deref(dict).nwords(), dim).copy()
@@ -341,7 +341,7 @@ cdef class FastText:
     query_norm = query_vec.norm()
     if abs(query_norm) < 1e-8:
       query_norm = 1.0
-    dict = get_fasttext_dict(self.ft)
+    dict = self.ft.getDictionary()
     for idx in range(deref(dict).nwords()):
       sig_check()
       word = deref(dict).getWord(idx)

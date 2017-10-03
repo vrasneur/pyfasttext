@@ -35,7 +35,7 @@ ALLOW_CONST_METHOD_ACCESS(Dictionary, int32_t, const std::string&, find);
 ALLOW_METHOD_ACCESS(Dictionary, void, , initTableDiscard);
 ALLOW_METHOD_ACCESS(Dictionary, void, , initNgrams);
 
-bool check_model(FastText &ft, const std::string &fname)
+bool check_model(const FastText &ft, const std::string &fname)
 {
   std::ifstream ifs(fname, std::ifstream::binary);
   if (!ifs.is_open()) {
@@ -43,7 +43,7 @@ bool check_model(FastText &ft, const std::string &fname)
     exit(EXIT_FAILURE);
   }
   
-  return ACCESS(ft, checkModel)(ifs);
+  return ACCESS(const_cast<FastText &>(ft), checkModel)(ifs);
 }
 
 static void load_older_dict(std::shared_ptr<Dictionary> &dict, std::istream &ifs)
@@ -116,25 +116,20 @@ void load_older_model(FastText &ft, const std::string &fname)
   }
 }
 
-std::shared_ptr<Args> &get_fasttext_args(FastText &ft)
+std::shared_ptr<const Args> get_fasttext_args(const FastText &ft)
 {
   return ACCESS(ft, args_);
 }
 
-std::shared_ptr<Dictionary> &get_fasttext_dict(FastText &ft)
-{
-  return ACCESS(ft, dict_);
-}
-
 void set_fasttext_max_tokenCount(FastText &ft)
 {
-  const auto &dict = get_fasttext_dict(ft);
-  const auto &args = get_fasttext_args(ft);
+  const auto dict = ft.getDictionary();
+  const auto args = get_fasttext_args(ft);
   
   ACCESS(ft, tokenCount) = args->epoch * dict->ntokens();
 }
 
-std::map<std::string, ArgValue> get_args_map(const std::shared_ptr<Args> &args)
+std::map<std::string, ArgValue> get_args_map(const std::shared_ptr<const Args> &args)
 {
   std::map<std::string, ArgValue> vals;
 
