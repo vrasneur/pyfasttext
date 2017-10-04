@@ -9,7 +9,7 @@ Load the language identification model
 
 Test the model
 >>> model.predict_single('les roses sont belles')
-['fr']
+[u'fr']
 
 >>> model.predict_single('the roses are beautiful')
-['en']
+[u'en']
