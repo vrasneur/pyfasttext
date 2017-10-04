@@ -7,9 +7,13 @@ import the pyfasttext module
 Load the language identification model
 >>> model = FastText(model_file)
 
-Test the model
->>> model.predict_single('les roses sont belles')
-[u'fr']
+Utility function
+>>> def print_lang(model, sentence):
+...   print(model.predict_single(sentence)[0])
 
->>> model.predict_single('the roses are beautiful')
-[u'en']
+Test the model
+>>> print_lang(model, 'les roses sont belles')
+fr
+
+>>> print_lang(model, 'the roses are beautiful')
+en
