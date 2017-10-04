@@ -1,5 +1,5 @@
->>> from sys import argv
->>> input_file = argv[-1]
+>>> from os import getenv
+>>> input_file = getenv('TEST_ARG')
 
 import the pyfasttext module
 >>> from pyfasttext import FastText

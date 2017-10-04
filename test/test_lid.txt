@@ -1,0 +1,15 @@
+>>> from os import getenv
+>>> model_file = getenv('TEST_ARG')
+
+import the pyfasttext module
+>>> from pyfasttext import FastText
+
+Load the language identification model
+>>> model = FastText(model_file)
+
+Test the model
+>>> model.predict_single('les roses sont belles')
+['fr']
+
+>>> model.predict_single('the roses are beautiful')
+['en']
