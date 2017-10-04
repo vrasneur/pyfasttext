@@ -5,7 +5,7 @@ from os.path import join
 import os
 import sys
 
-VERSION = '0.3.0'
+VERSION = '0.4.0'
 
 def to_bool(val):
     if not val:
