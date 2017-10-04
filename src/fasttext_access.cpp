@@ -100,6 +100,11 @@ void load_older_model(FastText &ft, const std::string &fname)
   INIT_ACCESS(ft, quant_) = false;
 
   args_->load(ifs);
+  if(args_->model == model_name::sup) {
+    // backward compatibility: old supervised models do not use char ngrams.
+    args_->maxn = 0;
+  }
+
   load_older_dict(dict_, ifs);
   input_->load(ifs);
   output_->load(ifs);
