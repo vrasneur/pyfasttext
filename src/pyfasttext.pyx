@@ -79,6 +79,7 @@ cdef extern from "fastText/src/dictionary.h" namespace "fasttext" nogil:
     string getLabel(int32_t) const
     int32_t nwords() const
     string getWord(int32_t) const
+    void getSubwords(const string &, vector[int32_t] &, vector[string] &) const
 
 cdef extern from "fastText/src/fasttext.h" namespace "fasttext" nogil:
   cdef cppclass CFastText "fasttext::FastText":
@@ -262,6 +263,19 @@ cdef class FastText:
       arr.append(deref(vec)[i])
 
     return arr
+
+  def get_substrings(self, word):
+    if not self.loaded:
+      return []
+
+    cdef:
+      vector[int32_t] ngrams
+      vector[string] substrings
+
+    word = bytes(word, self.encoding)
+    dict = self.ft.getDictionary()
+    deref(dict).getSubwords(word, ngrams, substrings)
+    return [substr.decode(self.encoding) for substr in substrings]
 
   IF USE_NUMPY:
     def get_numpy_vector(self, key, normalized=False):
