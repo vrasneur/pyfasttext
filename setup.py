@@ -1,11 +1,12 @@
 from setuptools import setup, Extension
 from Cython.Build import cythonize
+from Cython.Distutils import build_ext
 from glob import glob
 from os.path import join
 import os
 import sys
 
-VERSION = '0.4.0'
+VERSION = '0.4.1'
 
 def to_bool(val):
     if not val:
@@ -54,6 +55,7 @@ setup(name='pyfasttext',
       description='Yet another Python binding for fastText',
       long_description=open('README.rst', 'r').read(),
       license='GPLv3',
+      cmdclass = {'build_ext': build_ext},
       package_dir={'': 'src'},
       ext_modules=cythonize(extension, compile_time_env={'USE_NUMPY': USE_NUMPY}),
       install_requires=install_requires,

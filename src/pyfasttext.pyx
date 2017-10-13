@@ -264,7 +264,7 @@ cdef class FastText:
 
     return arr
 
-  def get_substrings(self, word):
+  def get_subwords(self, word):
     if not self.loaded:
       return []
 
