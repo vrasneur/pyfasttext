@@ -58,6 +58,8 @@ cdef extern from "fastText/src/matrix.h" namespace "fasttext" nogil:
   cdef cppclass Matrix:
     Matrix()
     Matrix(int64_t, int64_t)
+    int64_t m_
+    int64_t n_
     real *data_
     void zero()
     void addRow(const Vector&, int64_t, real)
@@ -78,7 +80,9 @@ cdef extern from "fastText/src/dictionary.h" namespace "fasttext" nogil:
     int32_t nlabels() const
     string getLabel(int32_t) const
     int32_t nwords() const
+    int32_t getId(const string &) const
     string getWord(int32_t) const
+    vector[int32_t] getSubwords(const string &) const
     void getSubwords(const string &, vector[int32_t] &, vector[string] &) const
 
 cdef extern from "fastText/src/fasttext.h" namespace "fasttext" nogil:
@@ -101,9 +105,12 @@ cdef extern from "fasttext_access.h" namespace "pyfasttext" nogil:
     size_t which()
   bool check_model(const CFastText&, const string&) except +
   void load_older_model(CFastText&, const string&) except +
-  cdef void set_fasttext_max_tokenCount(CFastText&)
-  cdef shared_ptr[const Args] get_fasttext_args(const CFastText&)
-  cdef map[string, ArgValue] get_args_map(const shared_ptr[const Args]&)
+  shared_ptr[const Args] get_fasttext_args(const CFastText&)
+  void set_fasttext_max_tokenCount(CFastText&)
+  bool add_input_vector(const CFastText&, Vector &, int32_t)
+  bool is_dict_pruned(const CFastText&)
+  bool is_word_pruned(const CFastText&, int32_t)
+  map[string, ArgValue] get_args_map(const shared_ptr[const Args]&)
   string convert_loss_name(const loss_name)
   string convert_model_name(const model_name)
 
@@ -212,11 +219,18 @@ cdef class FastText:
       elif index == 4:
         ret[key] = get[string](item.second).decode(self.encoding)
       elif index == 5:
-        ret[key] = convert_loss_name(get[loss_name](item.second))
+        ret[key] = convert_loss_name(get[loss_name](item.second)).decode(self.encoding)
       elif index == 6:
-        ret[key] = convert_model_name(get[model_name](item.second))
+        ret[key] = convert_model_name(get[model_name](item.second)).decode(self.encoding)
 
     return ret
+
+  @property
+  def pruned(self):
+    if not self.loaded:
+      return False
+
+    return is_dict_pruned(self.ft)
 
   @property
   def words(self):
@@ -264,19 +278,6 @@ cdef class FastText:
 
     return arr
 
-  def get_subwords(self, word):
-    if not self.loaded:
-      return []
-
-    cdef:
-      vector[int32_t] ngrams
-      vector[string] substrings
-
-    word = bytes(word, self.encoding)
-    dict = self.ft.getDictionary()
-    deref(dict).getSubwords(word, ngrams, substrings)
-    return [substr.decode(self.encoding) for substr in substrings]
-
   IF USE_NUMPY:
     def get_numpy_vector(self, key, normalized=False):
       if not self.loaded:
@@ -298,6 +299,68 @@ cdef class FastText:
       shape[0] = <np.npy_intp>(deref(vec).size())
       arr = np.PyArray_SimpleNew(1, shape, np.NPY_FLOAT32)
       memcpy(np.PyArray_DATA(arr), <void *>(deref(vec).data_), deref(vec).size() * sizeof(real))
+
+      return arr
+
+  def get_subwords(self, word, omit_word=False, omit_pruned=False):
+    if not self.loaded:
+      return []
+
+    cdef:
+      vector[int32_t] ngrams
+      vector[string] substrings
+      vector[string] temp
+
+    word = bytes(word, self.encoding)
+    dict = self.ft.getDictionary()
+    deref(dict).getSubwords(word, ngrams, substrings)
+
+    if omit_pruned:
+      if not ngrams.empty():
+        if not omit_word:
+          id = deref(dict).getId(word)
+          if id != -1:
+            temp.push_back(substrings[0])
+
+        for idx in xrange(ngrams.size() - 1):
+          if not is_word_pruned(self.ft, ngrams[idx + 1]):
+            temp.push_back(substrings[idx])
+      substrings = temp
+    elif omit_word and not substrings.empty():
+      substrings.erase(substrings.begin())
+
+    return [substr.decode(self.encoding) for substr in substrings]
+
+  IF USE_NUMPY:
+    def get_numpy_subword_vectors(self, word):
+      if not self.loaded:
+        return None
+
+      cdef:
+        int dim = self.ft.getDimension()
+        unique_ptr[Vector] vec = make_unique[Vector](dim)
+        vector[int32_t] ngrams
+        np.npy_intp shape[1]
+        char *ptr
+
+      word = bytes(word, self.encoding)
+      dict = self.ft.getDictionary()
+      ngrams = deref(dict).getSubwords(word);
+      if ngrams.empty():
+        return None
+
+      shape[0] = <np.npy_intp>ngrams.size()
+      shape[1] = <np.npy_intp>dim
+      arr = np.PyArray_SimpleNew(2, shape, np.NPY_FLOAT32)
+      for idx in xrange(ngrams.size()):
+        deref(vec).zero()
+        filled = add_input_vector(self.ft, deref(vec), ngrams[idx])
+        if not filled:
+          return None
+
+        ptr = <char*>(np.PyArray_DATA(arr))
+        ptr += idx * np.PyArray_STRIDE(arr, 0)
+        memcpy(ptr, <void *>(deref(vec).data_), deref(vec).size() * sizeof(real))
 
       return arr
 

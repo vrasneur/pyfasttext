@@ -31,12 +31,12 @@
   struct Only_##MEMBER { typedef TYPE CLASS::*type; }; \
   template class rob<Only_##MEMBER, &CLASS::MEMBER>
 
-#define ALLOW_METHOD_ACCESS(CLASS, RET_TYPE, PARAMS_TYPE, MEMBER)	\
-  struct Only_##MEMBER { typedef RET_TYPE(CLASS::*type)(PARAMS_TYPE); }; \
+#define ALLOW_METHOD_ACCESS(CLASS, RET_TYPE, MEMBER, ...)		\
+  struct Only_##MEMBER { typedef RET_TYPE(CLASS::*type)(__VA_ARGS__); }; \
   template class rob<Only_##MEMBER, &CLASS::MEMBER>
 
-#define ALLOW_CONST_METHOD_ACCESS(CLASS, RET_TYPE, PARAMS_TYPE, MEMBER)	\
-  struct Only_##MEMBER { typedef RET_TYPE(CLASS::*type)(PARAMS_TYPE) const; }; \
+#define ALLOW_CONST_METHOD_ACCESS(CLASS, RET_TYPE, MEMBER, ...)		\
+  struct Only_##MEMBER { typedef RET_TYPE(CLASS::*type)(__VA_ARGS__) const; }; \
   template class rob<Only_##MEMBER, &CLASS::MEMBER>
 
 #define ACCESS(OBJECT, MEMBER) \

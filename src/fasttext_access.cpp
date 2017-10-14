@@ -20,7 +20,7 @@ ALLOW_MEMBER_ACCESS(FastText, std::shared_ptr<QMatrix>, qoutput_);
 ALLOW_MEMBER_ACCESS(FastText, std::shared_ptr<Model>, model_);
 ALLOW_MEMBER_ACCESS(FastText, std::atomic<int64_t>, tokenCount);
 ALLOW_MEMBER_ACCESS(FastText, bool, quant_);
-ALLOW_METHOD_ACCESS(FastText, bool, std::istream&, checkModel);
+ALLOW_METHOD_ACCESS(FastText, bool, checkModel, std::istream&);
 
 ALLOW_MEMBER_ACCESS(Dictionary, std::vector<int32_t>, word2int_);
 ALLOW_MEMBER_ACCESS(Dictionary, std::vector<entry>, words_);
@@ -31,9 +31,10 @@ ALLOW_MEMBER_ACCESS(Dictionary, int64_t, ntokens_);
 ALLOW_MEMBER_ACCESS(Dictionary, int64_t, pruneidx_size_);
 typedef std::unordered_map<int32_t, int32_t> pruneidx_type;
 ALLOW_MEMBER_ACCESS(Dictionary, pruneidx_type, pruneidx_);
-ALLOW_CONST_METHOD_ACCESS(Dictionary, int32_t, const std::string&, find);
-ALLOW_METHOD_ACCESS(Dictionary, void, , initTableDiscard);
-ALLOW_METHOD_ACCESS(Dictionary, void, , initNgrams);
+ALLOW_CONST_METHOD_ACCESS(Dictionary, int32_t, find, const std::string&);
+ALLOW_CONST_METHOD_ACCESS(Dictionary, void, pushHash, std::vector<int32_t>&, int32_t);
+ALLOW_METHOD_ACCESS(Dictionary, void, initTableDiscard, );
+ALLOW_METHOD_ACCESS(Dictionary, void, initNgrams, );
 
 bool check_model(const FastText &ft, const std::string &fname)
 {
@@ -132,6 +133,60 @@ void set_fasttext_max_tokenCount(FastText &ft)
   const auto args = get_fasttext_args(ft);
   
   ACCESS(ft, tokenCount) = args->epoch * dict->ntokens();
+}
+
+bool add_input_vector(const FastText &ft, Vector &vec, int32_t id)
+{
+  bool filled = false;
+  
+  if(id >= 0) {
+    if(ACCESS(ft, quant_)) {
+      vec.addRow(*ACCESS(ft, qinput_), id);
+    }
+    else {
+      vec.addRow(*ACCESS(ft, input_), id);
+    }
+
+    filled = true;
+  }
+  
+  return filled;
+}
+
+bool add_input_vector(const FastText &ft, Vector &vec, const std::string &ngram)
+{
+  const auto dict = ft.getDictionary();
+  const int32_t id = dict->getId(ngram);
+
+  return add_input_vector(ft, vec, id);
+}
+
+bool is_dict_pruned(const FastText &ft)
+{
+  const auto dict = ft.getDictionary();
+
+  return (ACCESS(*dict, pruneidx_size_) != -1);
+}
+
+bool is_word_pruned(const FastText &ft, int32_t h)
+{
+  const auto dict = ft.getDictionary();
+
+  // invalid hash?
+  if(h == -1) {
+    return true;
+  }
+  
+  // dictionary not pruned at all?
+  if(!is_dict_pruned(ft)) {
+    return false;
+  }
+
+  // pruned dictionary, but ngram is still available?
+  std::vector<int32_t> ngrams;
+  ACCESS(*dict, pushHash)(ngrams, h - ACCESS(*dict, nwords_));
+  
+  return ngrams.empty();
 }
 
 std::map<std::string, ArgValue> get_args_map(const std::shared_ptr<const Args> &args)

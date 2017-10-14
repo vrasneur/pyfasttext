@@ -19,6 +19,14 @@ std::shared_ptr<const fasttext::Args> get_fasttext_args(const fasttext::FastText
 
 void set_fasttext_max_tokenCount(fasttext::FastText &ft);
 
+bool add_input_vector(const fasttext::FastText &ft, fasttext::Vector &vec, int32_t id);
+
+bool add_input_vector(const fasttext::FastText &ft, fasttext::Vector &vec, const std::string &ngram);
+
+bool is_dict_pruned(const fasttext::FastText &ft);
+
+bool is_word_pruned(const fasttext::FastText &ft, int32_t h);
+
 using ArgValue = mapbox::util::variant<bool, int, size_t, double, std::string, fasttext::loss_name, fasttext::model_name>;
 
 std::map<std::string, ArgValue> get_args_map(const std::shared_ptr<const fasttext::Args> &args);

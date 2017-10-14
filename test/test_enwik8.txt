@@ -1,3 +1,4 @@
+>>> import numpy as np
 >>> from os import getenv
 >>> input_file = getenv('TEST_ARG')
 
@@ -18,4 +19,14 @@ Reload the model file
 
 Test that the answer is the same as before
 >>> model.nearest_neighbors('queen', 10) == nn
+True
+
+Test that the vector is the average of all the subwords
+>>> def check_average(model, word):
+...   vec1 = model.get_numpy_vector(word)
+...   vecs2 = model.get_numpy_subword_vectors(word)
+...   return np.allclose(vec1, vecs2.sum(axis=0)/vecs2.shape[0])
+>>> check_average(model, 'hello')
+True
+>>> check_average(model, 'queen')
 True
