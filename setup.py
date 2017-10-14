@@ -7,6 +7,15 @@ import sys
 
 VERSION = '0.4.2'
 
+# if the module is being installed from pip using bdist_wheel
+# make sure cysignals is installed before compiling
+if 'bdist_wheel' in sys.argv:
+    try:
+        import cysignals
+    except ImportError:
+        from subprocess import check_call
+        check_call([sys.executable, '-m', 'pip', 'install', 'cysignals'])
+
 def to_bool(val):
     if not val:
         val = 0
