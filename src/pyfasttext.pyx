@@ -302,7 +302,7 @@ cdef class FastText:
 
       return arr
 
-  def get_subwords(self, word, omit_word=False, omit_pruned=False):
+  def get_subwords(self, word, omit_word=False, omit_pruned=True):
     if not self.loaded:
       return []
 
@@ -330,6 +330,9 @@ cdef class FastText:
       substrings.erase(substrings.begin())
 
     return [substr.decode(self.encoding) for substr in substrings]
+
+  def get_all_subwords(self, word, omit_word=False):
+    return self.get_subwords(word, omit_word=omit_word, omit_pruned=False)
 
   IF USE_NUMPY:
     def get_numpy_subword_vectors(self, word):
