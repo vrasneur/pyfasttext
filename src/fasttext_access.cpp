@@ -20,6 +20,7 @@ ALLOW_MEMBER_ACCESS(FastText, std::shared_ptr<QMatrix>, qoutput_);
 ALLOW_MEMBER_ACCESS(FastText, std::shared_ptr<Model>, model_);
 ALLOW_MEMBER_ACCESS(FastText, std::atomic<int64_t>, tokenCount);
 ALLOW_MEMBER_ACCESS(FastText, bool, quant_);
+ALLOW_MEMBER_ACCESS(FastText, int32_t, version);
 ALLOW_METHOD_ACCESS(FastText, bool, checkModel, std::istream&);
 
 ALLOW_MEMBER_ACCESS(Dictionary, std::vector<int32_t>, word2int_);
@@ -36,7 +37,7 @@ ALLOW_CONST_METHOD_ACCESS(Dictionary, void, pushHash, std::vector<int32_t>&, int
 ALLOW_METHOD_ACCESS(Dictionary, void, initTableDiscard, );
 ALLOW_METHOD_ACCESS(Dictionary, void, initNgrams, );
 
-bool check_model(const FastText &ft, const std::string &fname)
+bool check_model(FastText &ft, const std::string &fname)
 {
   std::ifstream ifs(fname, std::ifstream::binary);
   if (!ifs.is_open()) {
@@ -44,7 +45,7 @@ bool check_model(const FastText &ft, const std::string &fname)
     exit(EXIT_FAILURE);
   }
   
-  return ACCESS(const_cast<FastText &>(ft), checkModel)(ifs);
+  return ACCESS(ft, checkModel)(ifs);
 }
 
 static void load_older_dict(std::shared_ptr<Dictionary> &dict, std::istream &ifs)
@@ -99,6 +100,8 @@ void load_older_model(FastText &ft, const std::string &fname)
   INIT_ACCESS(ft, qinput_) = std::make_shared<QMatrix>();
   INIT_ACCESS(ft, qoutput_) = std::make_shared<QMatrix>();
   INIT_ACCESS(ft, quant_) = false;
+
+  ACCESS(ft, version) = -1;
 
   args_->load(ifs);
   if(args_->model == model_name::sup) {
@@ -159,6 +162,16 @@ bool add_input_vector(const FastText &ft, Vector &vec, const std::string &ngram)
   const int32_t id = dict->getId(ngram);
 
   return add_input_vector(ft, vec, id);
+}
+
+int32_t get_model_version(const FastText &ft)
+{
+  return ACCESS(ft, version);
+}
+
+bool is_model_quantized(const FastText &ft)
+{
+  return ACCESS(ft, quant_);
 }
 
 bool is_dict_pruned(const FastText &ft)

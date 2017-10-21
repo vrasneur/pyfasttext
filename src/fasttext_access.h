@@ -11,7 +11,7 @@
 namespace pyfasttext
 {
 
-bool check_model(const fasttext::FastText &ft, const std::string &fname);
+bool check_model(fasttext::FastText &ft, const std::string &fname);
 
 void load_older_model(fasttext::FastText &ft, const std::string &fname);
 
@@ -22,6 +22,10 @@ void set_fasttext_max_tokenCount(fasttext::FastText &ft);
 bool add_input_vector(const fasttext::FastText &ft, fasttext::Vector &vec, int32_t id);
 
 bool add_input_vector(const fasttext::FastText &ft, fasttext::Vector &vec, const std::string &ngram);
+
+int32_t get_model_version(const fasttext::FastText &ft);
+
+bool is_model_quantized(const fasttext::FastText &ft);
 
 bool is_dict_pruned(const fasttext::FastText &ft);
 

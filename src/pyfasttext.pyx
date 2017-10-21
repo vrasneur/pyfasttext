@@ -103,11 +103,13 @@ cdef extern from "compat.h" namespace "pyfasttext" nogil:
 cdef extern from "fasttext_access.h" namespace "pyfasttext" nogil:
   cdef cppclass ArgValue:
     size_t which()
-  bool check_model(const CFastText&, const string&) except +
+  bool check_model(CFastText&, const string&) except +
   void load_older_model(CFastText&, const string&) except +
   shared_ptr[const Args] get_fasttext_args(const CFastText&)
   void set_fasttext_max_tokenCount(CFastText&)
   bool add_input_vector(const CFastText&, Vector &, int32_t)
+  int32_t get_model_version(const CFastText&)
+  bool is_model_quantized(const CFastText&)
   bool is_dict_pruned(const CFastText&)
   bool is_word_pruned(const CFastText&, int32_t)
   map[string, ArgValue] get_args_map(const shared_ptr[const Args]&)
@@ -224,6 +226,20 @@ cdef class FastText:
         ret[key] = convert_model_name(get[model_name](item.second)).decode(self.encoding)
 
     return ret
+
+  @property
+  def version(self):
+    if not self.loaded:
+      return -1
+
+    return get_model_version(self.ft)
+
+  @property
+  def quantized(self):
+    if not self.loaded:
+      return False
+
+    return is_model_quantized(self.ft)
 
   @property
   def pruned(self):
