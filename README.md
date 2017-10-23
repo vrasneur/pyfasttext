@@ -351,7 +351,7 @@ True
 '0.4.3'
 ```
 
-### Show fastText version
+#### Show fastText version
 
 As there is no version number in fastText, we use the fastText commit hash as a substitute.
 
