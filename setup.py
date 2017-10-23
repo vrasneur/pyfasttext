@@ -29,7 +29,7 @@ def to_bool(val):
     return bool(val)
 
 def get_fasttext_commit_hash():
-    with open('.git/modules/fastText/refs/heads/master', 'r') as f:
+    with open('.git/modules/fastText/HEAD', 'r') as f:
         return f.read().strip()
 
 # numpy support is optional
