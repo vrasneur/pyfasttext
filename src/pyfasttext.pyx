@@ -149,6 +149,13 @@ IF USE_NUMPY:
 
     return arr
 
+  cdef mat_to_numpy_array(const Matrix &mat):
+    cdef np.npy_intp shape[1]
+
+    shape[0] = <np.npy_intp>(mat.m_ * mat.n_)
+    arr = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT32, <void *>mat.data_)
+    return arr.reshape(mat.m_, mat.n_).copy()
+
 cdef class FastText:
   cdef:
     CFastText ft
@@ -520,14 +527,7 @@ cdef class FastText:
 
       self.precompute_word_vectors()
 
-      cdef:
-        int dim = self.ft.getDimension()
-        np.npy_intp shape[1]
-
-      dict = self.ft.getDictionary()
-      shape[0] = <np.npy_intp>(deref(dict).nwords() * dim)
-      arr = np.PyArray_SimpleNewFromData(1, shape, np.NPY_FLOAT32, <void *>deref(self.word_vectors).data_)
-      return arr.reshape(deref(dict).nwords(), dim).copy()
+      return mat_to_numpy_array(deref(self.word_vectors))
 
   cdef find_nearest_neighbors(self, const Vector &query_vec, int32_t k,
                               const set[string] &ban_set):
