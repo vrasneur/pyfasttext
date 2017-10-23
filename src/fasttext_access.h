@@ -17,6 +17,8 @@ void load_older_model(fasttext::FastText &ft, const std::string &fname);
 
 std::shared_ptr<const fasttext::Args> get_fasttext_args(const fasttext::FastText &ft);
 
+std::shared_ptr<fasttext::Model> get_fasttext_model(fasttext::FastText &ft);
+
 void set_fasttext_max_tokenCount(fasttext::FastText &ft);
 
 bool add_input_vector(const fasttext::FastText &ft, fasttext::Vector &vec, int32_t id);

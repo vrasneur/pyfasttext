@@ -27,6 +27,10 @@ IF USE_NUMPY:
 
   np.import_array()
 
+cdef extern from "<random>" namespace "std" nogil:
+  cdef cppclass minstd_rand:
+    pass
+
 cdef extern from "<iostream>" namespace "std" nogil:
   cdef cppclass istream:
     int peek()
@@ -75,6 +79,10 @@ cdef extern from "fastText/src/args.h" namespace "fasttext" nogil:
     string label
     void parseArgs(vector[string]&) except +
 
+cdef extern from "fastText/src/model.h" namespace "fasttext" nogil:
+  cdef cppclass Model:
+    minstd_rand rng
+
 cdef extern from "fastText/src/dictionary.h" namespace "fasttext" nogil:
   cdef cppclass Dictionary:
     int32_t nlabels() const
@@ -84,6 +92,7 @@ cdef extern from "fastText/src/dictionary.h" namespace "fasttext" nogil:
     string getWord(int32_t) const
     vector[int32_t] getSubwords(const string &) const
     void getSubwords(const string &, vector[int32_t] &, vector[string] &) const
+    int32_t getLine(istream&, vector[int32_t]&, vector[int32_t]&, minstd_rand&) const
 
 cdef extern from "fastText/src/fasttext.h" namespace "fasttext" nogil:
   cdef cppclass CFastText "fasttext::FastText":
@@ -106,6 +115,7 @@ cdef extern from "fasttext_access.h" namespace "pyfasttext" nogil:
   bool check_model(CFastText&, const string&) except +
   void load_older_model(CFastText&, const string&) except +
   shared_ptr[const Args] get_fasttext_args(const CFastText&)
+  shared_ptr[Model] get_fasttext_model(CFastText&)
   void set_fasttext_max_tokenCount(CFastText&)
   bool add_input_vector(const CFastText&, Vector &, int32_t)
   int32_t get_model_version(const CFastText&)
@@ -118,6 +128,23 @@ cdef extern from "fasttext_access.h" namespace "pyfasttext" nogil:
 
 cdef extern from "variant/include/mapbox/variant.hpp" namespace "mapbox::util" nogil:
   T get[T](const ArgValue&)
+
+cdef vec_to_array(const Vector &vec):
+  arr = array.array('f')
+  for i in range(vec.size()):
+    arr.append(vec[i])
+
+  return arr
+
+IF USE_NUMPY:
+  cdef vec_to_numpy_array(const Vector &vec):
+    cdef np.npy_intp shape[1]
+
+    shape[0] = <np.npy_intp>(vec.size())
+    arr = np.PyArray_SimpleNew(1, shape, np.NPY_FLOAT32)
+    memcpy(np.PyArray_DATA(arr), <void *>(vec.data_), vec.size() * sizeof(real))
+
+    return arr
 
 cdef class FastText:
   cdef:
@@ -285,14 +312,10 @@ cdef class FastText:
       unique_ptr[Vector] vec = make_unique[Vector](dim)
 
     key = bytes(key, self.encoding)
-    arr = array.array('f')
     deref(vec).zero()
-    
     self.ft.getVector(deref(vec), key)
-    for i in range(deref(vec).size()):
-      arr.append(deref(vec)[i])
 
-    return arr
+    return vec_to_array(deref(vec))
 
   IF USE_NUMPY:
     def get_numpy_vector(self, key, normalized=False):
@@ -302,7 +325,6 @@ cdef class FastText:
       cdef:
         int dim = self.ft.getDimension()
         unique_ptr[Vector] vec = make_unique[Vector](dim)
-        np.npy_intp shape[1]
 
       key = bytes(key, self.encoding)
       deref(vec).zero()
@@ -312,11 +334,8 @@ cdef class FastText:
         norm = deref(vec).norm()
         if norm > 0:
           deref(vec).mul(1.0 / norm)
-      shape[0] = <np.npy_intp>(deref(vec).size())
-      arr = np.PyArray_SimpleNew(1, shape, np.NPY_FLOAT32)
-      memcpy(np.PyArray_DATA(arr), <void *>(deref(vec).data_), deref(vec).size() * sizeof(real))
 
-      return arr
+      return vec_to_numpy_array(deref(vec))
 
   def get_subwords(self, word, omit_word=False, omit_pruned=True):
     if not self.loaded:
@@ -382,6 +401,91 @@ cdef class FastText:
         memcpy(ptr, <void *>(deref(vec).data_), deref(vec).size() * sizeof(real))
 
       return arr
+
+  cdef get_sentence_vector_aux(self, line, Vector &svec, sep=None):
+    if not self.loaded:
+      return None
+
+    cdef:
+      int dim = self.ft.getDimension()
+      unique_ptr[Vector] vec = make_unique[Vector](dim)
+
+    svec.zero()
+    count = 0
+    for word in line.split(sep):
+      word = bytes(word, self.encoding)
+      deref(vec).zero()
+      self.ft.getVector(deref(vec), word)
+      norm = deref(vec).norm()
+      if norm > 0:
+        deref(vec).mul(1.0 / norm)
+        svec.addVector(deref(vec), 1.0)
+        count += 1
+
+    if count > 0:
+      svec.mul(1.0 / count)
+
+  def get_sentence_vector(self, line, sep=None):
+    cdef:
+      int dim = self.ft.getDimension()
+      unique_ptr[Vector] svec = make_unique[Vector](dim)
+
+    self.get_sentence_vector_aux(line, deref(svec), sep=sep)
+
+    return vec_to_array(deref(svec))
+
+  IF USE_NUMPY:
+    def get_numpy_sentence_vector(self, line, sep=None):
+      cdef:
+        int dim = self.ft.getDimension()
+        unique_ptr[Vector] svec = make_unique[Vector](dim)
+
+      self.get_sentence_vector_aux(line, deref(svec), sep=sep)
+
+      return vec_to_numpy_array(deref(svec))
+
+  cdef get_text_vector_aux(self, line, Vector &vec):
+    if not self.loaded:
+      return None
+
+    cdef:
+      unique_ptr[istringstream] iss = make_unique[istringstream]()
+      vector[int32_t] words
+      vector[int32_t] labels
+
+    vec.zero()
+    dict = self.ft.getDictionary()
+    line = bytes(line, self.encoding)
+    deref(iss).str(line)
+    model = get_fasttext_model(self.ft)
+    # handle word + char ngrams (subwords) + word ngrams
+    deref(dict).getLine(deref(iss), words, labels, deref(model).rng)
+    for word in words:
+      filled = add_input_vector(self.ft, vec, word)
+      if not filled:
+        return None
+
+    if not words.empty():
+       vec.mul(1.0 / words.size())
+
+  def get_text_vector(self, line):
+    cdef:
+      int dim = self.ft.getDimension()
+      unique_ptr[Vector] vec = make_unique[Vector](dim)
+
+    self.get_text_vector_aux(line, deref(vec))
+
+    return vec_to_array(deref(vec))
+
+  IF USE_NUMPY:
+    def get_numpy_text_vector(self, line):
+      cdef:
+        int dim = self.ft.getDimension()
+        unique_ptr[Vector] vec = make_unique[Vector](dim)
+
+      self.get_text_vector_aux(line, deref(vec))
+
+      return vec_to_numpy_array(deref(vec))
 
   cdef precompute_word_vectors(self):
     if self.word_vectors:

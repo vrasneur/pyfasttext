@@ -130,6 +130,11 @@ std::shared_ptr<const Args> get_fasttext_args(const FastText &ft)
   return ACCESS(ft, args_);
 }
 
+std::shared_ptr<fasttext::Model> get_fasttext_model(fasttext::FastText &ft)
+{
+  return ACCESS(ft, model_);
+}
+
 void set_fasttext_max_tokenCount(FastText &ft)
 {
   const auto dict = ft.getDictionary();
