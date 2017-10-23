@@ -328,7 +328,38 @@ Use keyword arguments in the `model.quantize()` method.
 
 You can load quantized models using the `FastText` constructor or the `model.load_model()` method.
 
+##### Is a model quantized?
+
+If you want to know if a model has been quantized before, use the `quantized` attribute.
+
+```python
+>>> model = FastText('/path/to/model.bin')
+>>> model.quantized
+False
+>>> model = FastText('/path/to/model.ftz')
+>>> model.quantized
+True
+```
+
 ### Misc utilities
+
+#### Show the module version
+
+```python
+>>> import pyfasttext
+>>> pyfasttext.__version__
+'0.4.3'
+```
+
+### Show fastText version
+
+As there is no version number in fastText, we use the fastText commit hash as a substitute.
+
+```python
+>>> import pyfasttext
+>>> pyfasttext.__fasttext_version__
+'431c9e2a9b5149369cc60fb9f5beba58dcf8ca17'
+```
 
 #### Show the model (hyper)parameters
 
