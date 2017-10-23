@@ -6,3 +6,4 @@ global-include *.h
 global-include *.itm
 
 include README.md
+include .git/modules/fastText/refs/heads/master

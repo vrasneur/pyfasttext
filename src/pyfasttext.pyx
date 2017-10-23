@@ -129,6 +129,9 @@ cdef extern from "fasttext_access.h" namespace "pyfasttext" nogil:
 cdef extern from "variant/include/mapbox/variant.hpp" namespace "mapbox::util" nogil:
   T get[T](const ArgValue&)
 
+__version__ = VERSION
+__fasttext_version__ = FASTTEXT_VERSION
+
 cdef vec_to_array(const Vector &vec):
   arr = array.array('f')
   for i in range(vec.size()):

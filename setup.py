@@ -28,6 +28,10 @@ def to_bool(val):
             val = 1
     return bool(val)
 
+def get_fasttext_commit_hash():
+    with open('.git/modules/fastText/refs/heads/master', 'r') as f:
+        return f.read().strip()
+
 # numpy support is optional
 USE_NUMPY = to_bool(os.environ.get('USE_NUMPY', '1'))
 
@@ -66,7 +70,9 @@ setup(name='pyfasttext',
       long_description=open('README.rst', 'r').read(),
       license='GPLv3',
       package_dir={'': 'src'},
-      ext_modules=cythonize(extension, compile_time_env={'USE_NUMPY': USE_NUMPY}),
+      ext_modules=cythonize(extension, compile_time_env={'USE_NUMPY': USE_NUMPY,
+                                                         'VERSION': VERSION,
+                                                         'FASTTEXT_VERSION': get_fasttext_commit_hash()}),
       install_requires=install_requires,
       classifiers=[
           'Development Status :: 3 - Alpha',
