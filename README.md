@@ -419,9 +419,10 @@ To compute the vector of a sequence of words (*i.e.* a sentence), fastText uses 
 
 #### Unsupervised models
 
-The representation of a sentence for fastText is the average of the normalized word vectors.
+For unsupervised models, the representation of a sentence for fastText is the average of the normalized word vectors (*i.e* the word itself and its subwords).
 
 To get the resulting vector as a regular Python array, use the `model.get_sentence_vector(line)` method.
+
 To get the resulting vector as a `numpy` `ndarray`, use the `model.get_numpy_sentence_vector(line)` method.
 
 ```python
@@ -434,11 +435,18 @@ True
 
 #### Supervised models
 
-Word vectors and word ngrams vector (not normalized)
+For supervised models, fastText uses the regular word vectors (*i.e* the word itself and its subwords), as well as vectors computed using word ngrams (*i.e.* shorter sequences of words from the sentence). When computing the average, these vectors are not normalized.
 
-`model.get_text_vector(line)`
+To get the resulting vector as a regular Python array, use the `model.get_text_vector(line)` method.
 
-`model.get_numpy_text_vector(line)`
+To get the resulting vector as a `numpy` `ndarray`, use the `model.get_numpy_text_vector(line)` method.
+
+```python
+>>> model.get_numpy_sentence_vector('beautiful cats') # for an unsupervised model
+array([-0.20266785,  0.3407566 ,  ...,  0.03044436,  0.39055538], dtype=float32)
+>>> model.get_numpy_text_vector('beautiful cats') # for a supervised model
+array([-0.20840774,  0.4289546 ,  ..., -0.00457615,  0.52417743], dtype=float32)
+```
 
 ### Misc utilities
 
