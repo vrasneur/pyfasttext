@@ -357,9 +357,37 @@ You can access the subwords, and their associated vectors, using `pyfasttext`.
 
 #### Get the subwords
 
-`model.get_all_subwords(word)`
+fastText's word embeddings can be augmented with subword-level information. It is possible to retrieve the subwords and their associated vectors from a model using `pyfasttext`.
 
-`model.get_subwords(word)`
+To retrieve all the subwords for a given word, use the `model.get_all_subwords(word)` method.
+
+```python
+>>> model.args.get('minn'), model.args.get('maxn')
+(2, 4)
+>>> model.get_all_subwords('hello') # word + subwords from 2 to 4 characters
+['hello', '<h', '<he', '<hel', 'he', 'hel', 'hell', 'el', 'ell', 'ello', 'll', 'llo', 'llo>', 'lo', 'lo>', 'o>']
+```
+
+For fastText, `<` means "beginning of a word" and `>` means "end of a word".
+
+As you can see, fastText includes the full word. You can omit it using the `omit_word=True` keyword argument.
+
+```python
+>>> model.get_all_subwords('hello', omit_word=True)
+['<h', '<he', '<hel', 'he', 'hel', 'hell', 'el', 'ell', 'ello', 'll', 'llo', 'llo>', 'lo', 'lo>', 'o>']
+```
+
+When a model is quantized, fastText may *prune* some subwords.
+If you want to see only the subwords that are really used when computing a word vector, you should use the `model.get_subwords(word)` method.
+
+```python
+>>> model.quantized
+True
+>>> model.get_subwords('beautiful')
+['eau', 'aut', 'ful', 'ul']
+>>> model.get_subwords('hello')
+['hello'] # fastText will not use any subwords when computing the word vector, only the full word
+```
 
 #### Get the subword vectors
 
