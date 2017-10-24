@@ -338,7 +338,7 @@ You can load quantized models using the `FastText` constructor or the `model.loa
 
 ##### Is a model quantized?
 
-If you want to know if a model has been quantized before, use the `quantized` attribute.
+If you want to know if a model has been quantized before, use the `model.quantized` attribute.
 
 ```python
 >>> model = FastText('/path/to/model.bin')
@@ -413,9 +413,28 @@ True
 
 ### Sentence and text vectors
 
-`model.get_sentence_vector(line)`
+To compute the vector of a sequence of words (*i.e.* a sentence), fastText uses two different methods:
+* one for unsupervised models
+* another one for supervised models
 
-`model.get_numpy_sentence_vector(line)`
+#### Unsupervised models
+
+The representation of a sentence for fastText is the average of the normalized word vectors.
+
+To get the resulting vector as a regular Python array, use the `model.get_sentence_vector(line)` method.
+To get the resulting vector as a `numpy` `ndarray`, use the `model.get_numpy_sentence_vector(line)` method.
+
+```python
+>>> vec = model.get_numpy_sentence_vector('beautiful cats')
+>>> vec1 = model.get_numpy_vector('beautiful', normalized=True)
+>>> vec2 = model.get_numpy_vector('cats', normalized=True)
+>>> np.allclose(vec, np.average([vec1, vec2], axis=0)
+True
+```
+
+#### Supervised models
+
+Word vectors and word ngrams vector (not normalized)
 
 `model.get_text_vector(line)`
 
@@ -456,7 +475,7 @@ As there is no version number in fastText, we use the fastText commit hash (from
 
 #### Show the model version number
 
-fastText uses a versioning scheme for its generated models. You can retrieve the model version number using the `version` attribute.
+fastText uses a versioning scheme for its generated models. You can retrieve the model version number using the `model.version` attribute.
 
 | version number | description |
 | --- | --- |
