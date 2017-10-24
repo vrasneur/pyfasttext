@@ -29,8 +29,11 @@ def to_bool(val):
     return bool(val)
 
 def get_fasttext_commit_hash():
-    with open('.git/modules/fastText/HEAD', 'r') as f:
-        return f.read().strip()
+    try:
+        with open('.git/modules/fastText/HEAD', 'r') as f:
+            return f.read().strip()
+    except:
+        return 'unknown'
 
 # numpy support is optional
 USE_NUMPY = to_bool(os.environ.get('USE_NUMPY', '1'))
