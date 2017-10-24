@@ -353,7 +353,7 @@ True
 
 #### Show fastText version
 
-As there is no version number in fastText, we use the fastText commit hash as a substitute.
+As there is no version number in fastText, we use the fastText commit hash (from `HEAD`) as a substitute.
 
 ```python
 >>> import pyfasttext
@@ -372,6 +372,21 @@ As there is no version number in fastText, we use the fastText commit hash as a 
  'epoch': 100,
 ...
 }
+```
+
+#### Show the model version number
+
+fastText uses a versioning scheme for its generated models. You can retrieve the model version number using the `version` attribute.
+
+| version number | description |
+| --- | --- |
+| -1 | for really old models with no version number |
+| 11 | first version number added by fastText |
+| 12 | for models generated after fastText added support for subwords in supervised learning |
+
+```python
+>>> model.version
+12
 ```
 
 #### Extract labels or classes from a dataset
