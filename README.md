@@ -391,7 +391,25 @@ True
 
 #### Get the subword vectors
 
-`model.get_numpy_subword_vectors(word)`
+To get all the individual vectors from the subwords, use the `model.get_numpy_subword_vectors(word)` method.
+
+```python
+>>> model.get_numpy_subword_vectors('beautiful') # 4 vectors, so 4 rows
+array([[ 0.49022141,  0.13586822,  ..., -0.14065443,  0.89617103], # subword "eau"
+       [-0.42594951,  0.06260503,  ..., -0.18182631,  0.34219387], # subword "aut"
+       [ 0.49958718,  2.93831301,  ..., -1.97498322, -1.16815805], # subword "ful"
+       [-0.4368791 , -1.92924356,  ...,  1.62921488, 1.90240896]], dtype=float32) # subword "ul"
+```
+
+In fastText, the final word vector is the average of these individual vectors.
+
+```python
+>>> import numpy as np
+>>> vec1 = model.get_numpy_vector('beautiful')
+>>> vecs2 = model.get_numpy_subword_vectors('beautiful')
+>>> np.allclose(vec1, vecs2.sum(axis=0)/vecs2.shape[0])
+True
+```
 
 ### Sentence and text vectors
 
