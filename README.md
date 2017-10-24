@@ -1,8 +1,8 @@
 # pyfasttext
 Yet another Python binding for [fastText](https://github.com/facebookresearch/fastText).
 
-The binding supports Python 2.6, 2.7 and Python 3. It requires Cython.
-Numpy is also a dependency, but is optional.
+The binding supports Python 2.6, 2.7 and Python 3. It requires [Cython](http://cython.org/) and [cysignals](http://cysignals.readthedocs.io/en/latest/).
+[Numpy](http://www.numpy.org/) is also a dependency, but is optional.
 
 `pyfasttext` has been tested successfully on Linux and Mac OS X.
 
@@ -43,8 +43,16 @@ Table of Contents
                   * [Normalized probabilities](#normalized-probabilities)
                * [Labels only](#labels-only)
             * [Quantization](#quantization)
+               * [Is a model quantized?](#is-a-model-quantized)
+         * [Subwords](#subwords)
+            * [Get the subwords](#get-the-subwords)
+            * [Get the subword vectors](#get-the-subword-vectors)
+         * [Sentence and text vectors](#sentence-and-text-vectors)
          * [Misc utilities](#misc-utilities)
+            * [Show the module version](#show-the-module-version)
+            * [Show fastText version](#show-fasttext-version)
             * [Show the model (hyper)parameters](#show-the-model-hyperparameters)
+            * [Show the model version number](#show-the-model-version-number)
             * [Extract labels or classes from a dataset](#extract-labels-or-classes-from-a-dataset)
                * [Extract labels](#extract-labels)
                * [Extract classes](#extract-classes)
@@ -340,6 +348,32 @@ False
 >>> model.quantized
 True
 ```
+
+### Subwords
+
+fastText can use subwords (i.e. character ngrams) when doing unsupervised or supervised learning.
+
+You can access the subwords, and their associated vectors, using `pyfasttext`.
+
+#### Get the subwords
+
+`model.get_all_subwords(word)`
+
+`model.get_subwords(word)`
+
+#### Get the subword vectors
+
+`model.get_numpy_subword_vectors(word)`
+
+### Sentence and text vectors
+
+`model.get_sentence_vector(line)`
+
+`model.get_numpy_sentence_vector(line)`
+
+`model.get_text_vector(line)`
+
+`model.get_numpy_text_vector(line)`
 
 ### Misc utilities
 
