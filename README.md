@@ -189,7 +189,7 @@ The `model.get_numpy_vector(word)` method returns the word vector as a `numpy` `
 array([-1.30874979, -1.83262241, ...], dtype=float32)
 ```
 
-If you want a normalized vector (i.e. the vector divided by its norm), there is an optional boolean parameter named `normalized`.
+If you want a normalized vector (*i.e.* the vector divided by its norm), there is an optional boolean parameter named `normalized`.
 
 ```python
 >>> model.get_numpy_vector('dog', normalized=True)
@@ -374,7 +374,7 @@ True
 
 ### Subwords
 
-fastText can use subwords (i.e. character ngrams) when doing unsupervised or supervised learning.
+fastText can use subwords (*i.e.* character ngrams) when doing unsupervised or supervised learning.
 
 You can access the subwords, and their associated vectors, using `pyfasttext`.
 
@@ -483,7 +483,7 @@ array([-0.20840774,  0.4289546 ,  ..., -0.00457615,  0.52417743], dtype=float32)
 
 #### Show fastText version
 
-As there is no version number in fastText, we use the fastText commit hash (from `HEAD`) as a substitute.
+As there is no version number in fastText, we use the latest fastText commit hash (from `HEAD`) as a substitute.
 
 ```python
 >>> import pyfasttext
@@ -550,7 +550,7 @@ There can be only one class per line.
 
 ### Exceptions
 
-The `fastText` source code directly calls exit() when something wrong happens (e.g. a model file does not exist, ...).
+The `fastText` source code directly calls exit() when something wrong happens (*e.g.* a model file does not exist, ...).
 
 Instead of exiting, `pyfasttext` raises a Python exception (`RuntimeError`).
 

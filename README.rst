@@ -262,7 +262,7 @@ The ``model.get_numpy_vector(word)`` method returns the word vector as a
     >>> model.get_numpy_vector('dog')
     array([-1.30874979, -1.83262241, ...], dtype=float32)
 
-If you want a normalized vector (i.e. the vector divided by its norm),
+If you want a normalized vector (*i.e.* the vector divided by its norm),
 there is an optional boolean parameter named ``normalized``.
 
 .. code:: python
@@ -485,7 +485,7 @@ If you want to know if a model has been quantized before, use the
 Subwords
 ~~~~~~~~
 
-fastText can use subwords (i.e. character ngrams) when doing
+fastText can use subwords (*i.e.* character ngrams) when doing
 unsupervised or supervised learning.
 
 You can access the subwords, and their associated vectors, using
@@ -621,8 +621,8 @@ Show the module version
 Show fastText version
 ^^^^^^^^^^^^^^^^^^^^^
 
-As there is no version number in fastText, we use the fastText commit
-hash (from ``HEAD``) as a substitute.
+As there is no version number in fastText, we use the latest fastText
+commit hash (from ``HEAD``) as a substitute.
 
 .. code:: python
 
@@ -708,7 +708,7 @@ Exceptions
 ~~~~~~~~~~
 
 The ``fastText`` source code directly calls exit() when something wrong
-happens (e.g. a model file does not exist, ...).
+happens (*e.g.* a model file does not exist, ...).
 
 Instead of exiting, ``pyfasttext`` raises a Python exception
 (``RuntimeError``).
@@ -727,8 +727,8 @@ Instead of exiting, ``pyfasttext`` raises a Python exception
 Interruptible operations
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-``pyfasttext`` uses ``cysignals`` to make all the computationally intensive
-operations (*e.g.* training) interruptible.
+``pyfasttext`` uses ``cysignals`` to make all the computationally
+intensive operations (*e.g.* training) interruptible.
 
 To easily interrupt such an operation, just type ``Ctrl-C`` in your
 Python shell.
