@@ -567,7 +567,7 @@ RuntimeError: fastext tried to exit: 1
 
 ### Interruptible operations
 
-`pyfasttext` uses `cysignals` to make all the computing intensive operations (*e.g.* training) interruptible.
+`pyfasttext` uses `cysignals` to make all the computationally intensive operations (*e.g.* training) interruptible.
 
 To easily interrupt such an operation, just type `Ctrl-C` in your Python shell.
 

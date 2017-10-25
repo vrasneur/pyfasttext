@@ -727,7 +727,7 @@ Instead of exiting, ``pyfasttext`` raises a Python exception
 Interruptible operations
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-``pyfasttext`` uses ``cysignals`` to make all the computing intensive
+``pyfasttext`` uses ``cysignals`` to make all the computationally intensive
 operations (*e.g.* training) interruptible.
 
 To easily interrupt such an operation, just type ``Ctrl-C`` in your
