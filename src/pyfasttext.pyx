@@ -1,4 +1,4 @@
-# pyfastext
+# pyfasttext
 # Yet another Python binding for fastText
 # 
 # Copyright (c) 2017 Vincent Rasneur <vrasneur@free.fr>
