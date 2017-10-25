@@ -7,9 +7,9 @@ import sys
 
 VERSION = '0.4.3'
 
-# if the module is being installed from pip using bdist_wheel
+# if the module is being installed from pip using bdist_wheel or egg_info
 # make sure cysignals is installed before compiling
-if 'bdist_wheel' in sys.argv:
+if 'bdist_wheel' in sys.argv or 'egg_info' in sys.argv:
     try:
         import cysignals
     except ImportError:
