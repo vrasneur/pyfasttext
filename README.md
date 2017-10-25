@@ -572,7 +572,7 @@ RuntimeError: fastext tried to exit: 1
 To easily interrupt such an operation, just type `Ctrl-C` in your Python shell.
 
 ```python
->>> model.skipgram(input='/path/to/input.txt', output='')
+>>> model.skipgram(input='/path/to/input.txt', output='/path/to/mymodel')
 Read 12M words
 Number of words:  60237
 Number of labels: 0

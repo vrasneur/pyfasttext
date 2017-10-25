@@ -735,7 +735,7 @@ Python shell.
 
 .. code:: python
 
-    >>> model.skipgram(input='/path/to/input.txt', output='')
+    >>> model.skipgram(input='/path/to/input.txt', output='/path/to/mymodel')
     Read 12M words
     Number of words:  60237
     Number of labels: 0
