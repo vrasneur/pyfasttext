@@ -4,8 +4,11 @@ pyfasttext
 Yet another Python binding for
 `fastText <https://github.com/facebookresearch/fastText>`__.
 
-| The binding supports Python 2.6, 2.7 and Python 3. It requires Cython.
-| Numpy is also a dependency, but is optional.
+| The binding supports Python 2.6, 2.7 and Python 3. It requires
+  `Cython <http://cython.org/>`__ and
+  `cysignals <http://cysignals.readthedocs.io/en/latest/>`__.
+| `Numpy <http://www.numpy.org/>`__ is also a dependency, but is
+  optional.
 
 ``pyfasttext`` has been tested successfully on Linux and Mac OS X.
 
@@ -13,14 +16,19 @@ Table of Contents
 =================
 
 -  `pyfasttext <#pyfasttext>`__
+-  `Table of Contents <#table-of-contents>`__
 
    -  `Installation <#installation>`__
 
       -  `Simplest way to install pyfasttext: use
          pip <#simplest-way-to-install-pyfasttext-use-pip>`__
+
+         -  `Possible compilation error <#possible-compilation-error>`__
+
       -  `Cloning <#cloning>`__
       -  `Requirements for Python 2.7 <#requirements-for-python-27>`__
-      -  `Building and installing <#building-and-installing>`__
+      -  `Building and installing
+         manually <#building-and-installing-manually>`__
 
          -  `Building and installing without
             Numpy <#building-and-installing-without-numpy>`__
@@ -69,17 +77,33 @@ Table of Contents
 
          -  `Labels only <#labels-only>`__
          -  `Quantization <#quantization>`__
+         -  `Is a model quantized? <#is-a-model-quantized>`__
+
+      -  `Subwords <#subwords>`__
+
+         -  `Get the subwords <#get-the-subwords>`__
+         -  `Get the subword vectors <#get-the-subword-vectors>`__
+
+      -  `Sentence and text vectors <#sentence-and-text-vectors>`__
+
+         -  `Unsupervised models <#unsupervised-models>`__
+         -  `Supervised models <#supervised-models>`__
 
       -  `Misc utilities <#misc-utilities>`__
 
+         -  `Show the module version <#show-the-module-version>`__
+         -  `Show fastText version <#show-fasttext-version>`__
          -  `Show the model
             (hyper)parameters <#show-the-model-hyperparameters>`__
+         -  `Show the model version
+            number <#show-the-model-version-number>`__
          -  `Extract labels or classes from a
             dataset <#extract-labels-or-classes-from-a-dataset>`__
          -  `Extract labels <#extract-labels>`__
          -  `Extract classes <#extract-classes>`__
 
       -  `Exceptions <#exceptions>`__
+      -  `Interruptible operations <#interruptible-operations>`__
 
 Installation
 ------------
@@ -95,6 +119,19 @@ Just type this line:
 .. code:: bash
 
     pip install pyfasttext
+
+Possible compilation error
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you have a compilation error, you can try to install ``cysignals``
+manually:
+
+.. code:: bash
+
+    pip install cysignals
+
+Then, retry to install ``pyfasttext`` with the already mentioned ``pip``
+command.
 
 Cloning
 ~~~~~~~
@@ -121,8 +158,16 @@ Requirements for Python 2.7
 
     pip install future
 
-Building and installing
-~~~~~~~~~~~~~~~~~~~~~~~
+Building and installing manually
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+First, install all the requirements:
+
+.. code:: bash
+
+    pip install -r requirements.txt
+
+Then, build and install with ``setup.py``:
 
 .. code:: bash
 
@@ -422,8 +467,168 @@ Use keyword arguments in the ``model.quantize()`` method.
 You can load quantized models using the ``FastText`` constructor or the
 ``model.load_model()`` method.
 
+Is a model quantized?
+'''''''''''''''''''''
+
+If you want to know if a model has been quantized before, use the
+``model.quantized`` attribute.
+
+.. code:: python
+
+    >>> model = FastText('/path/to/model.bin')
+    >>> model.quantized
+    False
+    >>> model = FastText('/path/to/model.ftz')
+    >>> model.quantized
+    True
+
+Subwords
+~~~~~~~~
+
+fastText can use subwords (i.e. character ngrams) when doing
+unsupervised or supervised learning.
+
+You can access the subwords, and their associated vectors, using
+``pyfasttext``.
+
+Get the subwords
+^^^^^^^^^^^^^^^^
+
+fastText's word embeddings can be augmented with subword-level
+information. It is possible to retrieve the subwords and their
+associated vectors from a model using ``pyfasttext``.
+
+To retrieve all the subwords for a given word, use the
+``model.get_all_subwords(word)`` method.
+
+.. code:: python
+
+    >>> model.args.get('minn'), model.args.get('maxn')
+    (2, 4)
+    >>> model.get_all_subwords('hello') # word + subwords from 2 to 4 characters
+    ['hello', '<h', '<he', '<hel', 'he', 'hel', 'hell', 'el', 'ell', 'ello', 'll', 'llo', 'llo>', 'lo', 'lo>', 'o>']
+
+For fastText, ``<`` means "beginning of a word" and ``>`` means "end of
+a word".
+
+As you can see, fastText includes the full word. You can omit it using
+the ``omit_word=True`` keyword argument.
+
+.. code:: python
+
+    >>> model.get_all_subwords('hello', omit_word=True)
+    ['<h', '<he', '<hel', 'he', 'hel', 'hell', 'el', 'ell', 'ello', 'll', 'llo', 'llo>', 'lo', 'lo>', 'o>']
+
+When a model is quantized, fastText may *prune* some subwords. If you
+want to see only the subwords that are really used when computing a word
+vector, you should use the ``model.get_subwords(word)`` method.
+
+.. code:: python
+
+    >>> model.quantized
+    True
+    >>> model.get_subwords('beautiful')
+    ['eau', 'aut', 'ful', 'ul']
+    >>> model.get_subwords('hello')
+    ['hello'] # fastText will not use any subwords when computing the word vector, only the full word
+
+Get the subword vectors
+^^^^^^^^^^^^^^^^^^^^^^^
+
+To get the individual vectors given the subwords, use the
+``model.get_numpy_subword_vectors(word)`` method.
+
+.. code:: python
+
+    >>> model.get_numpy_subword_vectors('beautiful') # 4 vectors, so 4 rows
+    array([[ 0.49022141,  0.13586822,  ..., -0.14065443,  0.89617103], # subword "eau"
+           [-0.42594951,  0.06260503,  ..., -0.18182631,  0.34219387], # subword "aut"
+           [ 0.49958718,  2.93831301,  ..., -1.97498322, -1.16815805], # subword "ful"
+           [-0.4368791 , -1.92924356,  ...,  1.62921488, 1.90240896]], dtype=float32) # subword "ul"
+
+In fastText, the final word vector is the average of these individual
+vectors.
+
+.. code:: python
+
+    >>> import numpy as np
+    >>> vec1 = model.get_numpy_vector('beautiful')
+    >>> vecs2 = model.get_numpy_subword_vectors('beautiful')
+    >>> np.allclose(vec1, np.average(vecs2, axis=0))
+    True
+
+Sentence and text vectors
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To compute the vector of a sequence of words (*i.e.* a sentence),
+fastText uses two different methods: \* one for unsupervised models \*
+another one for supervised models
+
+When fastText computes a word vector, recall that it uses the average of
+the following vectors: the word itself and its subwords.
+
+Unsupervised models
+^^^^^^^^^^^^^^^^^^^
+
+For unsupervised models, the representation of a sentence for fastText
+is the average of the normalized word vectors.
+
+| To get the resulting vector as a regular Python array, use the
+  ``model.get_sentence_vector(line)`` method.
+| To get the resulting vector as a ``numpy`` ``ndarray``, use the
+  ``model.get_numpy_sentence_vector(line)`` method.
+
+.. code:: python
+
+    >>> vec = model.get_numpy_sentence_vector('beautiful cats')
+    >>> vec1 = model.get_numpy_vector('beautiful', normalized=True)
+    >>> vec2 = model.get_numpy_vector('cats', normalized=True)
+    >>> np.allclose(vec, np.average([vec1, vec2], axis=0)
+    True
+
+Supervised models
+^^^^^^^^^^^^^^^^^
+
+For supervised models, fastText uses the regular word vectors, as well
+as vectors computed using word ngrams (*i.e.* shorter sequences of words
+from the sentence). When computing the average, these vectors are not
+normalized.
+
+| To get the resulting vector as a regular Python array, use the
+  ``model.get_text_vector(line)`` method.
+| To get the resulting vector as a ``numpy`` ``ndarray``, use the
+  ``model.get_numpy_text_vector(line)`` method.
+
+.. code:: python
+
+    >>> model.get_numpy_sentence_vector('beautiful cats') # for an unsupervised model
+    array([-0.20266785,  0.3407566 ,  ...,  0.03044436,  0.39055538], dtype=float32)
+    >>> model.get_numpy_text_vector('beautiful cats') # for a supervised model
+    array([-0.20840774,  0.4289546 ,  ..., -0.00457615,  0.52417743], dtype=float32)
+
 Misc utilities
 ~~~~~~~~~~~~~~
+
+Show the module version
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: python
+
+    >>> import pyfasttext
+    >>> pyfasttext.__version__
+    '0.4.3'
+
+Show fastText version
+^^^^^^^^^^^^^^^^^^^^^
+
+As there is no version number in fastText, we use the fastText commit
+hash (from ``HEAD``) as a substitute.
+
+.. code:: python
+
+    >>> import pyfasttext
+    >>> pyfasttext.__fasttext_version__
+    '431c9e2a9b5149369cc60fb9f5beba58dcf8ca17'
 
 Show the model (hyper)parameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -439,13 +644,38 @@ Show the model (hyper)parameters
     ...
     }
 
+Show the model version number
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+fastText uses a versioning scheme for its generated models. You can
+retrieve the model version number using the ``model.version`` attribute.
+
++----------------+------------------------+
+| version number | description            |
++================+========================+
+| -1             | for really old models  |
+|                | with no version number |
++----------------+------------------------+
+| 11             | first version number   |
+|                | added by fastText      |
++----------------+------------------------+
+| 12             | for models generated   |
+|                | after fastText added   |
+|                | support for subwords   |
+|                | in supervised learning |
++----------------+------------------------+
+
+.. code:: python
+
+    >>> model.version
+    12
+
 Extract labels or classes from a dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-| You can use the ``FastText`` object to extract labels or classes from
-  a dataset.
-| The label prefix (which is ``__label__`` by default) is set using the
-  ``label`` parameter in the constructor.
+You can use the ``FastText`` object to extract labels or classes from a
+dataset. The label prefix (which is ``__label__`` by default) is set
+using the ``label`` parameter in the constructor.
 
 If you load an existing model, the label prefix will be the one defined
 in the model.
@@ -493,3 +723,12 @@ Instead of exiting, ``pyfasttext`` raises a Python exception
       File "src/pyfasttext.pyx", line 124, in pyfasttext.FastText.__cinit__ (src/pyfasttext.cpp:1800)
       File "src/pyfasttext.pyx", line 348, in pyfasttext.FastText.load_model (src/pyfasttext.cpp:5947)
     RuntimeError: fastext tried to exit: 1
+
+Interruptible operations
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+``pyfasttext`` uses ``cysignals`` to make all the computing intensive
+operations (*e.g.* training) interruptible.
+
+To easily interrupt such an operation, just type ``Ctrl-C`` in your
+Python shell.

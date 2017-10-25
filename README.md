@@ -1,7 +1,7 @@
 # pyfasttext
 Yet another Python binding for [fastText](https://github.com/facebookresearch/fastText).
 
-The binding supports Python 2.6, 2.7 and Python 3. It requires [Cython](http://cython.org/) and [cysignals](http://cysignals.readthedocs.io/en/latest/).
+The binding supports Python 2.6, 2.7 and Python 3. It requires [Cython](http://cython.org/) and [cysignals](http://cysignals.readthedocs.io/en/latest/).  
 [Numpy](http://www.numpy.org/) is also a dependency, but is optional.
 
 `pyfasttext` has been tested successfully on Linux and Mac OS X.
@@ -10,11 +10,13 @@ Table of Contents
 =================
 
    * [pyfasttext](#pyfasttext)
+   * [Table of Contents](#table-of-contents)
       * [Installation](#installation)
          * [Simplest way to install pyfasttext: use pip](#simplest-way-to-install-pyfasttext-use-pip)
+            * [Possible compilation error](#possible-compilation-error)
          * [Cloning](#cloning)
          * [Requirements for Python 2.7](#requirements-for-python-27)
-         * [Building and installing](#building-and-installing)
+         * [Building and installing manually](#building-and-installing-manually)
             * [Building and installing without Numpy](#building-and-installing-without-numpy)
       * [Usage](#usage)
          * [How to load the library?](#how-to-load-the-library)
@@ -48,6 +50,8 @@ Table of Contents
             * [Get the subwords](#get-the-subwords)
             * [Get the subword vectors](#get-the-subword-vectors)
          * [Sentence and text vectors](#sentence-and-text-vectors)
+            * [Unsupervised models](#unsupervised-models)
+            * [Supervised models](#supervised-models)
          * [Misc utilities](#misc-utilities)
             * [Show the module version](#show-the-module-version)
             * [Show fastText version](#show-fasttext-version)
@@ -57,6 +61,7 @@ Table of Contents
                * [Extract labels](#extract-labels)
                * [Extract classes](#extract-classes)
          * [Exceptions](#exceptions)
+         * [Interruptible operations](#interruptible-operations)
 
 ## Installation
 
@@ -69,6 +74,16 @@ Just type this line:
 ```bash
 pip install pyfasttext
 ```
+
+#### Possible compilation error
+
+If you have a compilation error, you can try to install `cysignals` manually:
+
+```bash
+pip install cysignals
+```
+
+Then, retry to install `pyfasttext` with the already mentioned `pip` command.
 
 ### Cloning
 
@@ -89,7 +104,15 @@ You can install the `future` module with `pip`.
 pip install future
 ```
 
-### Building and installing
+### Building and installing manually
+
+First, install all the requirements:
+
+```bash
+pip install -r requirements.txt
+```
+
+Then, build and install with `setup.py`:
 
 ```bash
 python setup.py install
@@ -417,12 +440,13 @@ To compute the vector of a sequence of words (*i.e.* a sentence), fastText uses 
 * one for unsupervised models
 * another one for supervised models
 
+When fastText computes a word vector, recall that it uses the average of the following vectors: the word itself and its subwords.
+
 #### Unsupervised models
 
-For unsupervised models, the representation of a sentence for fastText is the average of the normalized word vectors (*i.e* the word itself and its subwords).
+For unsupervised models, the representation of a sentence for fastText is the average of the normalized word vectors.
 
-To get the resulting vector as a regular Python array, use the `model.get_sentence_vector(line)` method.
-
+To get the resulting vector as a regular Python array, use the `model.get_sentence_vector(line)` method.  
 To get the resulting vector as a `numpy` `ndarray`, use the `model.get_numpy_sentence_vector(line)` method.
 
 ```python
@@ -435,10 +459,9 @@ True
 
 #### Supervised models
 
-For supervised models, fastText uses the regular word vectors (*i.e* the word itself and its subwords), as well as vectors computed using word ngrams (*i.e.* shorter sequences of words from the sentence). When computing the average, these vectors are not normalized.
+For supervised models, fastText uses the regular word vectors, as well as vectors computed using word ngrams (*i.e.* shorter sequences of words from the sentence). When computing the average, these vectors are not normalized.
 
-To get the resulting vector as a regular Python array, use the `model.get_text_vector(line)` method.
-
+To get the resulting vector as a regular Python array, use the `model.get_text_vector(line)` method.  
 To get the resulting vector as a `numpy` `ndarray`, use the `model.get_numpy_text_vector(line)` method.
 
 ```python
@@ -486,10 +509,10 @@ As there is no version number in fastText, we use the fastText commit hash (from
 fastText uses a versioning scheme for its generated models. You can retrieve the model version number using the `model.version` attribute.
 
 | version number | description |
-| --- | --- |
-| -1 | for really old models with no version number |
-| 11 | first version number added by fastText |
-| 12 | for models generated after fastText added support for subwords in supervised learning |
+| :---: | :--- |
+| -1  | for really old models with no version number |
+| 11  | first version number added by fastText |
+| 12  | for models generated after fastText added support for subwords in supervised learning |
 
 ```python
 >>> model.version
@@ -541,3 +564,9 @@ Traceback (most recent call last):
   File "src/pyfasttext.pyx", line 348, in pyfasttext.FastText.load_model (src/pyfasttext.cpp:5947)
 RuntimeError: fastext tried to exit: 1
 ```
+
+### Interruptible operations
+
+`pyfasttext` uses `cysignals` to make all the computing intensive operations (*e.g.* training) interruptible.
+
+To easily interrupt such an operation, just type `Ctrl-C` in your Python shell.
