@@ -732,3 +732,19 @@ operations (*e.g.* training) interruptible.
 
 To easily interrupt such an operation, just type ``Ctrl-C`` in your
 Python shell.
+
+.. code:: python
+
+    >>> model.skipgram(input='/path/to/input.txt', output='')
+    Read 12M words
+    Number of words:  60237
+    Number of labels: 0
+    ... # type Ctrl-C during training
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "src/pyfasttext.pyx", line 680, in pyfasttext.FastText.skipgram (src/pyfasttext.cpp:11125)
+      File "src/pyfasttext.pyx", line 674, in pyfasttext.FastText.train (src/pyfasttext.cpp:11009)
+      File "src/pyfasttext.pyx", line 668, in pyfasttext.FastText.train (src/pyfasttext.cpp:10926)
+      File "src/cysignals/signals.pyx", line 94, in cysignals.signals.sig_raise_exception (build/src/cysignals/signals.c:1328)
+    KeyboardInterrupt
+    >>> # you can have your shell back!
