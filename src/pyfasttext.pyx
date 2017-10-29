@@ -406,7 +406,7 @@ cdef class FastText:
         int dim = self.ft.getDimension()
         unique_ptr[Vector] vec = make_unique[Vector](dim)
         vector[int32_t] ngrams
-        np.npy_intp shape[1]
+        np.npy_intp shape[2]
         char *ptr
 
       word = bytes(word, self.encoding)
