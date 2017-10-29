@@ -48,15 +48,15 @@
 
 #define ALLOW_MEMBER_ACCESS(CLASS, TYPE, MEMBER)       \
   struct Only_##MEMBER { typedef TYPE CLASS::*type; }; \
-  template class rob<Only_##MEMBER, &CLASS::MEMBER>
+  template struct rob<Only_##MEMBER, &CLASS::MEMBER>
 
 #define ALLOW_METHOD_ACCESS(CLASS, RET_TYPE, MEMBER, ...)		\
   struct Only_##MEMBER { typedef RET_TYPE(CLASS::*type)(__VA_ARGS__); }; \
-  template class rob<Only_##MEMBER, &CLASS::MEMBER>
+  template struct rob<Only_##MEMBER, &CLASS::MEMBER>
 
 #define ALLOW_CONST_METHOD_ACCESS(CLASS, RET_TYPE, MEMBER, ...)		\
   struct Only_##MEMBER { typedef RET_TYPE(CLASS::*type)(__VA_ARGS__) const; }; \
-  template class rob<Only_##MEMBER, &CLASS::MEMBER>
+  template struct rob<Only_##MEMBER, &CLASS::MEMBER>
 
 #define ACCESS(OBJECT, MEMBER) \
   ((OBJECT).*result<Only_##MEMBER>::ptr)
