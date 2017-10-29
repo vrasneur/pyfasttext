@@ -1,4 +1,5 @@
 from setuptools import setup, Extension
+from setuptools.command.build_ext import build_ext
 from Cython.Build import cythonize
 from glob import glob
 from os.path import join
@@ -55,13 +56,22 @@ sources.extend(set(glob(join(cpp_dir, '*.cc'))).difference(set([join(cpp_dir, 'm
 # exit() replacement does not work when we use extra_compile_args
 os.environ['CFLAGS'] = '-iquote . -include src/custom_exit.h'
 
+class BuildExt(build_ext):
+    def build_extensions(self):
+        extra_compile_args = self.extensions[0].extra_compile_args
+        if 'clang' in self.compiler.compiler[0]:
+            extra_compile_args.append('-std=c++1z')
+        else:
+            extra_compile_args.append('-std=c++0x')
+        build_ext.build_extensions(self)
+
 extension = Extension(
     'pyfasttext',
     sources=sources,
     libraries=['pthread'],
     include_dirs=include_dirs,
     language='c++',
-    extra_compile_args=['-std=c++0x', '-Wno-sign-compare'])
+    extra_compile_args=['-Wno-sign-compare'])
 
 setup(name='pyfasttext',
       version=VERSION,
@@ -77,6 +87,7 @@ setup(name='pyfasttext',
                                                          'VERSION': VERSION,
                                                          'FASTTEXT_VERSION': get_fasttext_commit_hash()}),
       install_requires=install_requires,
+      cmdclass={'build_ext': BuildExt},
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Intended Audience :: Developers',
