@@ -6,7 +6,7 @@ from os.path import join
 import os
 import sys
 
-VERSION = '0.4.3'
+VERSION = '0.4.4'
 
 # if the module is being installed from pip using bdist_wheel or egg_info
 # make sure cysignals is installed before compiling
