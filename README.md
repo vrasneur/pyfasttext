@@ -5,7 +5,7 @@ The binding supports Python 2.6, 2.7 and Python 3. It requires [Cython](http://c
 [Numpy](http://www.numpy.org/) is also a dependency, but is optional.
 
 `pyfasttext` has been tested successfully on Linux and Mac OS X.  
-It does not currently compile on Windows because the `cysignals` module does not support this platform.
+*Warning*: `pyfasttext` does not currently compile on Windows because the `cysignals` module does not support this platform.
 
 Table of Contents
 =================
@@ -66,7 +66,9 @@ Table of Contents
 
 ## Installation
 
-To compile `pyfasttext`, make sure you have a compiler with C++11 support.
+To compile `pyfasttext`, make sure you have the following compiler:
+* GCC (`g++`) with C++11 support.
+* LLVM (`clang++`) with (at least) partial C++17 support.
 
 ### Simplest way to install pyfasttext: use pip
 

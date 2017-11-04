@@ -10,7 +10,9 @@ Yet another Python binding for
 | `Numpy <http://www.numpy.org/>`__ is also a dependency, but is
   optional.
 
-``pyfasttext`` has been tested successfully on Linux and Mac OS X.
+| ``pyfasttext`` has been tested successfully on Linux and Mac OS X.
+| *Warning*: ``pyfasttext`` does not currently compile on Windows
+  because the ``cysignals`` module does not support this platform.
 
 Table of Contents
 =================
@@ -108,8 +110,9 @@ Table of Contents
 Installation
 ------------
 
-To compile ``pyfasttext``, make sure you have a compiler with C++11
-support.
+To compile ``pyfasttext``, make sure you have the following compiler: \*
+GCC (``g++``) with C++11 support. \* LLVM (``clang++``) with (at least)
+partial C++17 support.
 
 Simplest way to install pyfasttext: use pip
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -395,8 +398,18 @@ If you have a list of strings (or an iterable object), use this:
 
 .. code:: python
 
-    >>> model.predict_proba(['first sentence', 'second sentence'], k=2)
+    >>> model.predict_proba(['first sentence\n', 'second sentence\n'], k=2)
     [[('LABEL1', 0.99609375), ('LABEL3', 1.953126549381068e-08)], [('LABEL2', 1.0), ('LABEL3', 1.953126549381068e-08)]]
+
+If you want to test a single string, use this:
+
+.. code:: python
+
+    >>> model.predict_proba_single('first sentence\n', k=2)
+    [('LABEL1', 0.99609375), ('LABEL3', 1.953126549381068e-08)]
+
+**WARNING**: In order to get the same probabilities as the ``fastText``
+binary, you have to add a newline (``\n``) at the end of each string.
 
 If your test data is stored inside a file, use this:
 
@@ -404,13 +417,6 @@ If your test data is stored inside a file, use this:
 
     >>> model.predict_proba_file('/path/to/test.txt', k=2)
     [[('LABEL1', 0.99609375), ('LABEL3', 1.953126549381068e-08)], [('LABEL2', 1.0), ('LABEL3', 1.953126549381068e-08)]]
-
-If you want to test a single string, use this:
-
-.. code:: python
-
-    >>> model.predict_proba_single('first sentence', k=2)
-    [('LABEL1', 0.99609375), ('LABEL3', 1.953126549381068e-08)]
 
 Normalized probabilities
                         
@@ -426,9 +432,9 @@ parameter in all the methods that output probabilities
 
 .. code:: python
 
-    >>> sum(proba for label, proba in model.predict_proba_single('this is a sentence that needs to be classified', k=None))
+    >>> sum(proba for label, proba in model.predict_proba_single('this is a sentence that needs to be classified\n', k=None))
     0.9785203068801335
-    >>> sum(proba for label, proba in model.predict_proba_single('this is a sentence that needs to be classified', k=None, normalized=True))
+    >>> sum(proba for label, proba in model.predict_proba_single('this is a sentence that needs to be classified\n', k=None, normalized=True))
     0.9999999999999898
 
 Labels only
@@ -438,8 +444,18 @@ If you have a list of strings (or an iterable object), use this:
 
 .. code:: python
 
-    >>> model.predict(['first sentence', 'second sentence'], k=2)
+    >>> model.predict(['first sentence\n', 'second sentence\n'], k=2)
     [['LABEL1', 'LABEL3'], ['LABEL2', 'LABEL3']]
+
+If you want to test a single string, use this:
+
+.. code:: python
+
+    >>> model.predict_single('first sentence\n', k=2)
+    ['LABEL1', 'LABEL3']
+
+**WARNING**: In order to get the same probabilities as the ``fastText``
+binary, you have to add a newline (``\n``) at the end of each string.
 
 If your test data is stored inside a file, use this:
 
@@ -447,13 +463,6 @@ If your test data is stored inside a file, use this:
 
     >>> model.predict_file('/path/to/test.txt', k=2)
     [['LABEL1', 'LABEL3'], ['LABEL2', 'LABEL3']]
-
-If you want to test a single string, use this:
-
-.. code:: python
-
-    >>> model.predict_single('first sentence', k=2)
-    ['LABEL1', 'LABEL3']
 
 Quantization
 ^^^^^^^^^^^^
