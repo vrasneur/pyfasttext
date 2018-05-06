@@ -1,11 +1,12 @@
 # pyfasttext
 Yet another Python binding for [fastText](https://github.com/facebookresearch/fastText).
 
-The binding supports Python 2.6, 2.7 and Python 3. It requires [Cython](http://cython.org/) and [cysignals](http://cysignals.readthedocs.io/en/latest/).  
-[Numpy](http://www.numpy.org/) is also a dependency, but is optional.
+The binding supports Python 2.6, 2.7 and Python 3. It requires [Cython](http://cython.org/).
+
+[Numpy](http://www.numpy.org/) and [cysignals](http://cysignals.readthedocs.io/en/latest/) are also dependencies, but are optional.  
 
 `pyfasttext` has been tested successfully on Linux and Mac OS X.  
-*Warning*: `pyfasttext` does not currently compile on Windows because the `cysignals` module does not support this platform.
+*Warning*: if you want to compile `pyfasttext` on Windows, do not compile with the `cysignals` module because it does not support this platform.
 
 Table of Contents
 =================
@@ -18,7 +19,7 @@ Table of Contents
          * [Cloning](#cloning)
          * [Requirements for Python 2.7](#requirements-for-python-27)
          * [Building and installing manually](#building-and-installing-manually)
-            * [Building and installing without Numpy](#building-and-installing-without-numpy)
+            * [Building and installing without optional dependencies](#building-and-installing-without-optional-dependencies)
       * [Usage](#usage)
          * [How to load the library?](#how-to-load-the-library)
          * [How to load an existing model?](#how-to-load-an-existing-model)
@@ -72,9 +73,10 @@ To compile `pyfasttext`, make sure you have the following compiler:
 
 ### Simplest way to install pyfasttext: use pip
 
-Just type this line:
+Just type these lines:
 
 ```bash
+pip install cython
 pip install pyfasttext
 ```
 
@@ -121,7 +123,7 @@ Then, build and install with `setup.py`:
 python setup.py install
 ```
 
-#### Building and installing without Numpy
+#### Building and installing without optional dependencies
 
 `pyfasttext` can export word vectors as `numpy` `ndarray`s, however this feature can be disabled at compile time.
 
@@ -130,6 +132,8 @@ To compile without `numpy`, pyfasttext has a `USE_NUMPY` environment variable. S
 ```bash
 USE_NUMPY=0 python setup.py install
 ```
+
+If you want to compile without `cysignals`, likewise, you can set the `USE_CYSIGNALS` environment variable to 0 (or empty).
 
 ## Usage
 

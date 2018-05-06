@@ -3,21 +3,11 @@ from setuptools.command.build_ext import build_ext
 from Cython.Build import cythonize
 from glob import glob
 from os.path import join
+from subprocess import call
 import os
 import sys
 
-VERSION = '0.4.4'
-
-# if the module is being installed from pip using bdist_wheel or egg_info
-# make sure cysignals is installed before compiling
-if 'bdist_wheel' in sys.argv or 'egg_info' in sys.argv:
-    try:
-        import cysignals
-    except ImportError:
-        import pip
-        ret = pip.main(['install', 'cysignals'])
-        if ret:
-            raise RuntimeError('cannot install cysignals with pip')
+VERSION = '0.4.5'
 
 def to_bool(val):
     if not val:
@@ -29,6 +19,23 @@ def to_bool(val):
             val = 1
     return bool(val)
 
+# numpy support is optional
+USE_NUMPY = to_bool(os.environ.get('USE_NUMPY', '1'))
+# cysignals support is optional too
+USE_CYSIGNALS = to_bool(os.environ.get('USE_CYSIGNALS', '1'))
+if sys.platform == 'win32':
+    USE_CYSIGNALS = False
+
+# if the module is being installed from pip using bdist_wheel or egg_info
+# make sure cysignals is installed before compiling
+if USE_CYSIGNALS and 'bdist_wheel' in sys.argv or 'egg_info' in sys.argv:
+    try:
+        import cysignals
+    except ImportError:
+        ret = call([sys.executable, '-m', 'pip', 'install', 'cysignals'])
+        if ret:
+            raise RuntimeError('cannot install cysignals with pip')
+
 def get_fasttext_commit_hash():
     try:
         with open('.git/modules/fastText/HEAD', 'r') as f:
@@ -36,15 +43,12 @@ def get_fasttext_commit_hash():
     except:
         return 'unknown'
 
-# numpy support is optional
-USE_NUMPY = to_bool(os.environ.get('USE_NUMPY', '1'))
-
-include_dirs = ['.', 'src/variant/include']
-install_requires = ['cysignals', 'future']
+include_dirs = ['.', 'src/variant/include', 'src']
+setup_requires = []
+install_requires = ['future', 'cysignals']
 
 if USE_NUMPY:
-    import numpy as np
-    include_dirs.append(np.get_include())
+    setup_requires.append('numpy')
     install_requires.append('numpy')
 
 cpp_dir = join('src', 'fastText', 'src')
@@ -65,6 +69,14 @@ class BuildExt(build_ext):
             extra_compile_args.append('-std=c++0x')
         build_ext.build_extensions(self)
 
+    def finalize_options(self):
+        build_ext.finalize_options(self)
+        # prevent numpy from thinking it is still in its setup process
+        if USE_NUMPY:
+            __builtins__.__NUMPY_SETUP__ = False
+            import numpy as np
+            self.include_dirs.append(np.get_include())
+
 extension = Extension(
     'pyfasttext',
     sources=sources,
@@ -84,8 +96,10 @@ setup(name='pyfasttext',
       license='GPLv3',
       package_dir={'': 'src'},
       ext_modules=cythonize([extension], compile_time_env={'USE_NUMPY': USE_NUMPY,
+                                                           'USE_CYSIGNALS': USE_CYSIGNALS,
                                                            'VERSION': VERSION,
                                                            'FASTTEXT_VERSION': get_fasttext_commit_hash()}),
+      setup_requires=setup_requires,
       install_requires=install_requires,
       cmdclass={'build_ext': BuildExt},
       classifiers=[

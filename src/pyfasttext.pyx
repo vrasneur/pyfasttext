@@ -35,7 +35,10 @@ from libcpp.set cimport set
 from libcpp.utility cimport pair
 from libcpp.queue cimport priority_queue
 
-from cysignals.signals cimport sig_on, sig_off, sig_check
+IF USE_CYSIGNALS:
+  from cysignals.signals cimport sig_on, sig_off, sig_check
+ELSE:
+  sig_on = sig_off = sig_check = lambda: None
 
 import array
 

@@ -4,15 +4,17 @@ pyfasttext
 Yet another Python binding for
 `fastText <https://github.com/facebookresearch/fastText>`__.
 
-| The binding supports Python 2.6, 2.7 and Python 3. It requires
-  `Cython <http://cython.org/>`__ and
-  `cysignals <http://cysignals.readthedocs.io/en/latest/>`__.
-| `Numpy <http://www.numpy.org/>`__ is also a dependency, but is
-  optional.
+The binding supports Python 2.6, 2.7 and Python 3. It requires
+`Cython <http://cython.org/>`__.
+
+`Numpy <http://www.numpy.org/>`__ and
+`cysignals <http://cysignals.readthedocs.io/en/latest/>`__ are also
+dependencies, but are optional.
 
 | ``pyfasttext`` has been tested successfully on Linux and Mac OS X.
-| *Warning*: ``pyfasttext`` does not currently compile on Windows
-  because the ``cysignals`` module does not support this platform.
+| *Warning*: if you want to compile ``pyfasttext`` on Windows, do not
+  compile with the ``cysignals`` module because it does not support this
+  platform.
 
 Table of Contents
 =================
@@ -32,8 +34,8 @@ Table of Contents
       -  `Building and installing
          manually <#building-and-installing-manually>`__
 
-         -  `Building and installing without
-            Numpy <#building-and-installing-without-numpy>`__
+         -  `Building and installing without optional
+            dependencies <#building-and-installing-without-optional-dependencies>`__
 
    -  `Usage <#usage>`__
 
@@ -117,10 +119,11 @@ partial C++17 support.
 Simplest way to install pyfasttext: use pip
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Just type this line:
+Just type these lines:
 
 .. code:: bash
 
+    pip install cython
     pip install pyfasttext
 
 Possible compilation error
@@ -176,8 +179,8 @@ Then, build and install with ``setup.py``:
 
     python setup.py install
 
-Building and installing without Numpy
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Building and installing without optional dependencies
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``pyfasttext`` can export word vectors as ``numpy`` ``ndarray``\ s,
 however this feature can be disabled at compile time.
@@ -188,6 +191,9 @@ variable. Set this variable to 0 (or empty), like this:
 .. code:: bash
 
     USE_NUMPY=0 python setup.py install
+
+If you want to compile without ``cysignals``, likewise, you can set the
+``USE_CYSIGNALS`` environment variable to 0 (or empty).
 
 Usage
 -----
