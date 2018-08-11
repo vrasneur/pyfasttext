@@ -18,6 +18,8 @@
 
 from cython.operator cimport dereference as deref
 
+from cpython.bool cimport bool as pybool
+
 from libc.stdint cimport int32_t, int64_t
 from libc.stdio cimport EOF
 from libc.stdlib cimport malloc, free
@@ -674,8 +676,12 @@ cdef class FastText:
     args.push_back(bytes(command, self.encoding))
 
     for key, val in kwargs.items():
-      args.push_back(bytes('-' + key, self.encoding))
-      args.push_back(bytes(str(val), self.encoding))
+      if isinstance(val, pybool):
+        if val:
+          args.push_back(bytes('-' + key, self.encoding))
+      else:
+        args.push_back(bytes('-' + key, self.encoding))
+        args.push_back(bytes(str(val), self.encoding))
 
     cdef shared_ptr[Args] s_args = make_shared[Args]()
 

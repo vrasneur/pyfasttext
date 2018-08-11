@@ -7,7 +7,7 @@ from subprocess import call
 import os
 import sys
 
-VERSION = '0.4.5'
+VERSION = '0.4.6'
 
 def to_bool(val):
     if not val:
