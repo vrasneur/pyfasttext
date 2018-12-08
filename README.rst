@@ -1,6 +1,8 @@
 pyfasttext
 ==========
 
+*Warning!* ``pyfasttext`` **is no longer maintained: use the official Python binding from the fastText repository:** https://github.com/facebookresearch/fastText/tree/master/python
+
 Yet another Python binding for
 `fastText <https://github.com/facebookresearch/fastText>`__.
 
